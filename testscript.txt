@@ -1,0 +1,15 @@
+docker info
+:
+docker info
+:
+docker info
+docker info
+docker info
+docker info
+docker info
+docker info
+docker info
+docker info
+docker info
+docker info
+docker info

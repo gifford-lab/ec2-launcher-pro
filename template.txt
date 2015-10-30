@@ -1,0 +1,9 @@
+#!/bin/bash
+sudo usermod -a -G docker USER
+sudo service docker restart
+sudo -u USER bash -c 'RUN_STR 2>&1 | tee /cluster/ec2/INAME.txt'
+EMAIL
+cp ~/nohup.txt /tmp/nohup.txt
+aws ec2 cancel-spot-instance-requests --spot-instance-request-ids SIRNAME --region REGION
+sudo -u USER bash -c 'cp /tmp/nohup.txt /cluster/ec2/INAME-nohup.txt'
+aws ec2 terminate-instances --instance-ids INAME --region REGION
