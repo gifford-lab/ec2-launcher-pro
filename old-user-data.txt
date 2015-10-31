@@ -1,0 +1,57 @@
+#!/bin/bash
+export DEBIAN_FRONTEND=noninteractive
+sudo apt-get update
+sudo apt-get -q -y install linux-image-extra-`uname -r`
+sudo apt-get -q -y install nfs-common
+sudo mkdir /cluster
+sudo mount -t nfs -o proto=tcp,port=2049,noatime,rsize=32768,wsize=32768 10.0.11.163:/cluster /cluster
+sudo apt-get -q -y install apparmor-utils
+[ -e /usr/lib/apt/methods/https ] || {
+  sudo apt-get install apt-transport-https
+}
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9
+sudo sh -c "echo deb https://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list"
+sudo apt-get update
+sudo apt-get -q -y --force-yes install lxc-docker
+
+sudo groupadd docker
+sudo gpasswd -a ubuntu docker
+
+sudo mkfs -t ext4 /dev/xvdf
+sudo mkdir /scratch
+sudo mount /dev/xvdf /scratch
+
+sudo mkdir /scratch/docker
+sudo mv /var/lib/docker /scratch/docker
+sudo ln -s /scratch/docker /var/lib/docker
+sudo echo 'DOCKER_OPTS="-g /scratch/docker -G docker"' >> /etc/default/docker
+sudo service docker restart
+
+sudo apt-get -q -y install parallel
+
+sudo apt-get -q -y install python-pip
+sudo pip install awscli
+sudo mkdir ~/.aws
+
+sudo sudo mkdir /scratch/tmp
+sudo chmod -R 777 /scratch/tmp
+sudo touch /scratch/done
+
+sudo bash -c "cat /cluster/ec2/passwd | grep *csail* >> /etc/passwd"
+
+sudo usermod -a -G docker USER
+sudo service docker restart
+
+printf "[default]\naws_access_key_id=AKEY\naws_secret_access_key=SKEY" > ~/.aws/config
+
+iname=$(wget -q -O - http://169.254.169.254/latest/meta-data/instance-id)
+aws --region us-east-1 --output text ec2 create-tags --resources $iname --tags Key=Name,Value=docker-USER-NUM
+
+sudo -u USER bash -c "cat RUNCMD | parallel -j 100% 2>&1 | tee /cluster/ec2/$iname.txt"
+aws ses send-email --from thashim@csail.mit.edu --to EMAIL --text "$(tail -n 50 /var/log/cloud-init-output.log)" --subject ec2_run_complete --region REALM
+cp /var/log/cloud-init-output.log /tmp/nohup.txt
+sirname=$(aws --region us-east-1 --output text ec2 describe-spot-instance-requests | grep $iname | cut -d$'\t' -f6)
+rm -f RUNCMD
+aws ec2 cancel-spot-instance-requests --spot-instance-request-ids $sirname --region REALM
+sudo -u USER bash -c "cp /tmp/nohup.txt /cluster/ec2/$iname-nohup.txt"
+aws ec2 terminate-instances --instance-ids $iname --region REALM
