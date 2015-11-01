@@ -39,7 +39,7 @@ sudo sudo mkdir /scratch/tmp
 sudo chmod -R 777 /scratch/tmp
 sudo touch /scratch/done
 
-sudo bash -c "cat /cluster/ec2/passwd | grep *csail* >> /etc/passwd"
+sudo bash -c "cat /cluster/ec2/passwd  >> /etc/passwd"
 
 sudo usermod -a -G docker USER
 sudo service docker restart
