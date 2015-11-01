@@ -1,0 +1,1 @@
+docker run -i -v /cluster/ec2:/cluster/ec2 -v /etc/passwd:/root/passwd:ro -v /cluster/ec2/cred:/credfile:ro -v /cluster/zeng/code/research/ec2-launcher-test/testscript.txt:/commandfile --rm haoyangz/ec2-launcher python ec2run.py CPU -u $(id -un) -p 2
