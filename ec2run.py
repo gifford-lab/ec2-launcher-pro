@@ -47,7 +47,8 @@ def make_aws_command(args):
                     "ami" : args.ami,
                     "subnet" : args.subnet,
                     "keyname" : args.keyname,
-                    "itype" : args.itype}
+                    "itype" : args.itype,
+                    "volumesize" : args.volsize}
 
     # Open and close braces are doubled to escape string formatting.
     lspec = """
@@ -56,7 +57,7 @@ def make_aws_command(args):
     "KeyName":"{keyname}",
     "InstanceType":"{itype}",
     "NetworkInterfaces":[{{"DeviceIndex":0,"SubnetId":"{subnet}","AssociatePublicIpAddress":true}}],
-    "BlockDeviceMappings":[{{"DeviceName":"/dev/xvdf","Ebs":{{"VolumeSize":500,"DeleteOnTermination":true}}}}]
+    "BlockDeviceMappings":[{{"DeviceName":"/dev/xvdf","Ebs":{{"VolumeSize":{volumesize},"DeleteOnTermination":true}}}}]
     }}'
     """.strip().replace("\n", "").replace(" ", "").format(**lspec_params)
 
@@ -93,6 +94,7 @@ def parse_args():
     parser.add_argument("-n", "--splitsize", dest="splitsize", type=int, default=1, help="Number of commands per instance (default 1).")
     parser.add_argument("-b", "--bucket", dest="bucket", default="", help="The S3 bucket for data transfer (for S3 mode only)")
     parser.add_argument("-ru", "--runname", dest="runname", default="", help="The S3 runname for data transfer (for S3 mode only)")
+    parser.add_argument("-v", "--volumesize", dest="volsize", type=int,default=500, help="The size (in GB) of hard disck (/scratch) added to each EC2 instance (default 500)")
 
     return parser.parse_args()
 
