@@ -1,0 +1,1 @@
+docker run -v /cluster/zeng/code/research/mri-wrapper/example:/data -v /cluster/zeng/code/research/mri-wrapper/example:/model -i --rm --device /dev/nvidiactl --device /dev/nvidia-uvm --device /dev/nvidia0 haoyangz/mri-wrapper python main.py /model/runparam.list 0

@@ -33,6 +33,7 @@ def make_userdata(args):
               "EMAIL" : args.email,
               "AKEY" : creds["access_key_remote"],
               "SKEY" : creds["secret_key_remote"],
+              "GPUMODE_PARAM" : args.gpumode,
               "RUNCMD" : args.command}
 
     # Replace keywords in the template using the existing approach.
@@ -116,17 +117,13 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
     if args.mode == 'CPU':
-        args.userdata = 'old-user-data.txt'
+        args.gpumode = 'false'
     else:
-        args.userdata = 'user-data.txt'
+        args.gpumode = 'true'
+    args.userdata = 'user-data.txt'
     args.userdata = open(args.userdata)
     args.credfile = open('/credfile')
     args.commandfile = open('/commandfile')
-
-    # Check if VPN is up
-    if os.system('ping -c 5 172.16.0.95 -q') !=0:
-        print 'ERROR: no ipsec tunnel detected. Run sudo service ipsec restart'
-        sys.exit(1)
 
     # Update the passwd file on /cluster/ec2 so that the EC2 nodes can
     # have up-to-date information (they grab it in the user-data

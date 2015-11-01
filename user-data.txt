@@ -49,35 +49,38 @@ printf "[default]\naws_access_key_id=AKEY\naws_secret_access_key=SKEY" > ~/.aws/
 iname=$(wget -q -O - http://169.254.169.254/latest/meta-data/instance-id)
 aws --region us-east-1 --output text ec2 create-tags --resources $iname --tags Key=Name,Value=docker-USER-NUM
 
-/sbin/modprobe nvidia 
-if [ "$?" -eq 0 ]; then 
-    # Count the number of NVIDIA controllers found. 
-    NVDEVS=`lspci | grep -i NVIDIA` 
-    N3D=`echo "$NVDEVS" | grep "3D controller" | wc -l` 
-    NVGA=`echo "$NVDEVS" | grep "VGA compatible controller" | wc -l` 
+GPUMODE=GPUMODE_PARAM
+if [ $GPUMODE = true ]; then
+	/sbin/modprobe nvidia 
+	if [ "$?" -eq 0 ]; then 
+    	# Count the number of NVIDIA controllers found. 
+    	NVDEVS=`lspci | grep -i NVIDIA` 
+    	N3D=`echo "$NVDEVS" | grep "3D controller" | wc -l` 
+    	NVGA=`echo "$NVDEVS" | grep "VGA compatible controller" | wc -l` 
 
-    N=`expr $N3D + $NVGA - 1` 
-    for i in `seq 0 $N`; do 
-	  mknod -m 666 /dev/nvidia$i c 195 $i 
-	  done 
+    	N=`expr $N3D + $NVGA - 1` 
+    	for i in `seq 0 $N`; do 
+	  		mknod -m 666 /dev/nvidia$i c 195 $i 
+	  	done 
 
-    mknod -m 666 /dev/nvidiactl c 195 255 
-else 
-  exit 1 
-fi 
+    	mknod -m 666 /dev/nvidiactl c 195 255 
+	else 
+		exit 1 
+	fi
 
-/sbin/modprobe nvidia-uvm 
+	/sbin/modprobe nvidia-uvm 
 
-if [ "$?" -eq 0 ]; then 
-  # Find out the major device number used by the nvidia-uvm driver 
-  D=`grep nvidia-uvm /proc/devices | awk '{print $1}'` 
+	if [ "$?" -eq 0 ]; then 
+  	# Find out the major device number used by the nvidia-uvm driver 
+  	D=`grep nvidia-uvm /proc/devices | awk '{print $1}'` 
 
-  mknod -m 666 /dev/nvidia-uvm c $D 0 
-else 
-    exit 1 
+  	mknod -m 666 /dev/nvidia-uvm c $D 0 
+	else 
+    	exit 1 
+	fi
 fi
 
-sudo bash -c "cat RUNCMD | parallel -j 100% 2>&1 | tee /cluster/ec2/$iname.txt"
+sudo -u USER bash -c "cat RUNCMD | parallel -j 100% 2>&1 | tee /cluster/ec2/$iname.txt"
 aws ses send-email --from thashim@csail.mit.edu --to EMAIL --text "$(tail -n 50 /var/log/cloud-init-output.log)" --subject ec2_run_complete --region REALM
 cp /var/log/cloud-init-output.log /tmp/nohup.txt
 sirname=$(aws --region us-east-1 --output text ec2 describe-spot-instance-requests | grep $iname | cut -d$'\t' -f6)
