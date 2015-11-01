@@ -79,7 +79,7 @@ def launch_docker(command, args):
                   "user" : args.user,
                   "access_key" : creds["access_key"],
                   "secret_key" : creds["secret_key"]}
-              
+
     cmd = ("docker run -e AWS_ACCESS_KEY_ID={access_key} " +
            "-e AWS_SECRET_ACCESS_KEY={secret_key} " +
            "-u={user} " +
@@ -94,9 +94,10 @@ def parse_args():
     user = pwd.getpwuid(os.getuid())[0]
 
     # Positional (unnamed) arguments:
-    parser.add_argument("userdata", type=argparse.FileType("r"), help="Userdata file to user as a template.")
-    parser.add_argument("credfile", type=argparse.FileType("r"), help="Credentials file.") 
-    parser.add_argument("commandfile", default="-", nargs="?", type=argparse.FileType("r"), help="Command file (default stdin).") 
+    parser.add_argument("mode",  type=str, help="Running model (GPU/CPU)")
+    #parser.add_argument("userdata", type=argparse.FileType("r"), help="Userdata file to user as a template.")
+    #parser.add_argument("credfile", type=argparse.FileType("r"), help="Credentials file.")
+    #parser.add_argument("commandfile", default="-", nargs="?", type=argparse.FileType("r"), help="Command file (default stdin).")
 
     # Optional arguments:
     parser.add_argument("-a", "--ami", dest="ami", default="ami-864d84ee", help="Target AMI (default 864d84ee).")
@@ -107,42 +108,62 @@ def parse_args():
     parser.add_argument("-p", "--price", dest="price", type=float, default=0.34, help="Spot bid price (default 0.34).")
     parser.add_argument("-u", "--user", dest="user", default=user, help="User (default is $USER).")
     parser.add_argument("-e", "--email", dest="email", default=user + "@csail.mit.edu", help="Email (default is $USER@csail.mit.edu).")
-    parser.add_argument("-im", "--image", dest="image", default="matted/ec2-launcher", help="Launcher Docker image.(default matted/ec2-launcher")
+    parser.add_argument("-im", "--image", dest="image", default="haoyangz/ec2-launcher", help="Launcher Docker image.(default matted/ec2-launcher")
     parser.add_argument("-n", "--splitsize", dest="splitsize", type=int, default=1, help="Number of commands per instance (default 1).")
 
     return parser.parse_args()
-  
+
 if __name__ == "__main__":
     args = parse_args()
+    if args.mode == 'CPU':
+        args.userdata = 'old-user-data.txt'
+    else:
+        args.userdata = 'user-data.txt'
+    args.userdata = open(args.userdata)
+    args.credfile = open('/credfile')
+    args.commandfile = open('/commandfile')
 
     # Update the passwd file on /cluster/ec2 so that the EC2 nodes can
     # have up-to-date information (they grab it in the user-data
     # script).
     try:
-        shutil.copyfile("/etc/passwd", "/cluster/ec2/passwd")
+        shutil.copyfile("/root/passwd", "/cluster/ec2/passwd")
     except IOError:
         print >>sys.stderr, "Warning: failed to update /cluster/ec2/passwd"
+
+    #
+    creds = parse_cred_file(args.credfile)
+    os.system('mkdir ~/.aws')
+    os.system(''.join(['printf \"[default]\naws_access_key_id=',creds['access_key'],'\naws_secret_access_key=',creds['secret_key'],'\" > ~/.aws/config']))
 
     commands = args.commandfile.readlines()
 
     # Launch the commands in batches of size splitsize (by line).
+    runstr = open('runstr.txt','w')
     for index in xrange(0, len(commands) / args.splitsize):
         command = commands[index * args.splitsize : (index+1) * args.splitsize]
         command = [s.strip() for s in command]
         args.index = str(index+1)
 
-        with tempfile.NamedTemporaryFile(dir="/cluster/ec2/tmp", 
-                                         suffix=".txt", 
-                                         prefix="runcmd_", 
-                                         delete=False) as cmd_file:
-            cmd_file.writelines("\n".join(command))
-            cmd_file.flush()
-            args.command = cmd_file.name
-            cmd = make_aws_command(args)
-            print ">> launching batch %s: %s" % (args.index, command)
-            launch = launch_docker(cmd, args)
-            os.system(launch)
+        cmd_file = tempfile.NamedTemporaryFile(dir="/cluster/ec2/tmp",
+                                         suffix=".txt",
+                                         prefix="runcmd_",
+                                         delete=False)
+        cmd_file.writelines("\n".join(command))
+        cmd_file.flush()
+        cmd_file.close()
+        os.system('chmod 644 ' + cmd_file.name)
+        args.command = cmd_file.name
+        cmd = make_aws_command(args)
+        print ">> launching batch %s: %s" % (args.index, command)
+        runstr.write('%s\n' % cmd)
 
+    runstr.close()
+    os.system('cat runstr.txt | parallel -j 16')
+    os.system('cat runstr.txt')
+    args.userdata.close()
+    args.credfile.close()
+    args.commandfile.close()
     # TODO: Check for VPN tunnel before launching (outdated by a cronjob now?).
     # TODO: If user-data setup fails, the node doesn't stop itself
     # (for instance if the GPU setup is used on a non-GPU node).

@@ -1,15 +1,1 @@
-docker info
-:
-docker info
-:
-docker info
-docker info
-docker info
-docker info
-docker info
-docker info
-docker info
-docker info
-docker info
-docker info
-docker info
+docker run -i -v /cluster/ec2/:/model --rm ubuntu:14.04 touch /model/stamp
