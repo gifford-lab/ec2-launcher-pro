@@ -123,6 +123,11 @@ if __name__ == "__main__":
     args.credfile = open('/credfile')
     args.commandfile = open('/commandfile')
 
+    # Check if VPN is up
+    if os.system('ping -c 5 172.16.0.95 -q') !=0:
+        print 'ERROR: no ipsec tunnel detected. Run sudo service ipsec restart'
+        sys.exit(1)
+
     # Update the passwd file on /cluster/ec2 so that the EC2 nodes can
     # have up-to-date information (they grab it in the user-data
     # script).
@@ -131,7 +136,7 @@ if __name__ == "__main__":
     except IOError:
         print >>sys.stderr, "Warning: failed to update /cluster/ec2/passwd"
 
-    #
+    # Set up enviroment for running awscli
     creds = parse_cred_file(args.credfile)
     os.system('mkdir ~/.aws')
     os.system(''.join(['printf \"[default]\naws_access_key_id=',creds['access_key'],'\naws_secret_access_key=',creds['secret_key'],'\" > ~/.aws/config']))
@@ -164,6 +169,3 @@ if __name__ == "__main__":
     args.userdata.close()
     args.credfile.close()
     args.commandfile.close()
-    # TODO: Check for VPN tunnel before launching (outdated by a cronjob now?).
-    # TODO: If user-data setup fails, the node doesn't stop itself
-    # (for instance if the GPU setup is used on a non-GPU node).
