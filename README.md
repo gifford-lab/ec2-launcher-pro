@@ -7,7 +7,7 @@ Two connection modes are provided: VPN and S3.
 
 + For general users, the S3 mode is the only choice. In this model, the input data will be automatically uploaded to S3 storage and all the output will also be dumped to S3. The user will need to manually retrieve the output from S3 if needed.
 
-## Usage
+## Example Usage
 
 #### VPN mode
 ```
@@ -16,28 +16,25 @@ docker run -i -v /cluster/ec2:/cluster/ec2 -v /etc/passwd:/root/passwd:ro \
 	--rm haoyangz/ec2-launcher \
 	python ec2run.py CPU VPN -u $(id -un) 
 ```
-+ CREDFILE: The path to EC2 cred file. (example/cred)
-+ RUNFILE: The file containing bash commands to run. Each line should be one complete command and it will be run on one CPU/GPU. Multiple commands can be concatenated into oneline seperated by ";" and they will be sequentially executed. (example/testscript.txt, example/testscript-gpu.txt)
++ `CREDFILE`: The path to EC2 cred file. (example/cred)
++ `RUNFILE`: The file containing bash commands to run. Each line should be one complete bash command which will be run as one job (process). To specify the number of jobs per instance, checkout the "Option" section below. If needed, multiple bash commands can be concatenated into oneline seperated by ";" and they will be sequentially executed. (example/testscript.txt, example/testscript-gpu.txt)
++ `-u $(id -un)`: this is not required but suggested. See "Options" section for more details.
 
 #### S3 mode
 
 ```
 docker run -i -v DATADIR:/indata -v /etc/passwd:/root/passwd:ro \
 	-v CREDFILE:/credfile:ro -v RUNFILE:/commandfile \	--rm haoyangz/ec2-launcher-test \
-	python ec2run.py CPU S3 -u $(id -un) -b BUCKETNAME -ru RUNNAME -in /indata
+	python ec2run.py CPU S3 -b BUCKETNAME -ru RUNNAME
 ```
 
-+ DATADIR: The directory of the input data. All the subfolder of this directory will be copied to /scratch/input on the EC2 instance.
-+ CREDFILE: Same as above (example/cred)
-+ RUNFILE: Same as above (example/testscript-s3.txt, example/testscript-s3-gpu.txt)
-+ BUCKETNAME: The S3 bucket to store the input and output  **(required)**
-+ RUNNAME: The subfolder of S3 bucket to store the input and output. So all the data will be under $BUCKETNAME$/$RUNNAME$ on S3.  **(required)**
++ `DATADIR`: The directory of the input data. All the subfolder of this directory will be recursively copied to $BUCKETNAME$/$RUNNAME$/input on S3 and then to /scratch/input on the EC2 instance. Therefore, configure your commands in RUNFILE to get data from /scratch/input
++ `RUNFILE`: **Note** You should configure your commands in RUNFILE to output to /scratch/output, all the contents of which will be copied to S3 folder $BUCKETNAME$/$RUNNAME$/output when finished. (example/testscript-s3.txt, example/testscript-s3-gpu.txt)
++ `CREDFILE`: Same as in VPN mode (example/cred)
++ `BUCKETNAME`: The S3 bucket to store the input and output  **(required)**
++ `RUNNAME`: The subfolder of S3 bucket to store the input and output. So all the data will be under $BUCKETNAME$/$RUNNAME$ on S3.  **(required)**
 
 
-**In this mode, note:**
-
-
-+ You should write your commands in RUNFILE such that it outputs data to /scratch/output, all the contents of which will be copied to $BUCKETNAME$/$RUNNAME$/output when finished.
 
 ## Options
 Run the following command to get the full list of options:
@@ -76,6 +73,7 @@ optional arguments:
 + `ITYPE` Choose the right machine [type](https://aws.amazon.com/ec2/instance-types/) that matches your usage.
 + `REGION`: This is only tweakable for S3 mode as VPN is only built on us-east-1d
 + `PRICE`: In EC2 console, check out "Pricing History" under instances -> Spot Requests for a good price.
++ `USER`: The commands in `RUNFILE` will be run as this user. This is only meaningful for VPN mode, in which the EC2 instance directly writes the output to /cluster as that user.
 + `EMAIL`: No need to specifcy for Gifford lab
 + `SPLITSIZE`: This number of jobs will be running in parallel in one instance.
 + `BUCKET`: For S3 mode only

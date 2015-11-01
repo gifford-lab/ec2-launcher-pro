@@ -38,7 +38,7 @@ def make_userdata(args):
     for keyword, value in params.iteritems():
         userdata = userdata.replace(keyword, value)
 
-    print userdata
+    #print userdata
     return userdata
 
 # Make the aws client command string.
@@ -135,7 +135,7 @@ if __name__ == "__main__":
         args.remote_secret_key = creds['secret_key_remote']
     elif args.connection == 'S3':
         args.userdata = 'user-data-s3.txt'
-        args.inputdir != "/indata"
+        args.inputdir = "/indata"
         assert args.bucket != ""
         assert args.runname != ""
         os.system(' '.join(['aws s3 mb s3://'+args.bucket]))
