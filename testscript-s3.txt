@@ -1,0 +1,1 @@
+docker run -i -v /scratch/output:/output -v /scratch/input:/input --rm ubuntu:14.04 touch /output/testout

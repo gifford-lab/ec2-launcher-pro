@@ -4,13 +4,12 @@ export DEBIAN_FRONTEND=noninteractive
 sudo apt-get update
 sudo apt-get -q -y install linux-image-extra-`uname -r`
 sudo apt-get -q -y install nfs-common
-sudo mkdir /cluster
-sudo mount -t nfs -o proto=tcp,port=2049,noatime,rsize=32768,wsize=32768 10.0.11.163:/cluster /cluster
 sudo apt-get -q -y install apparmor-utils
 [ -e /usr/lib/apt/methods/https ] || {
   sudo apt-get install apt-transport-https
 }
 
+# Set up docker
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9
 sudo sh -c "echo deb https://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list"
 sudo apt-get update
@@ -29,8 +28,8 @@ sudo ln -s /scratch/docker /var/lib/docker
 sudo echo 'DOCKER_OPTS="-g /scratch/docker -G docker"' >> /etc/default/docker
 sudo service docker restart
 
+# Set up AWSCLI and other user-specific setup
 sudo apt-get -q -y install parallel
-
 sudo apt-get -q -y install python-pip
 sudo pip install awscli
 sudo mkdir ~/.aws
@@ -39,16 +38,17 @@ sudo sudo mkdir /scratch/tmp
 sudo chmod -R 777 /scratch/tmp
 sudo touch /scratch/done
 
-sudo bash -c "cat /cluster/ec2/passwd | grep *csail* >> /etc/passwd"
+printf "[default]\naws_access_key_id=AKEY\naws_secret_access_key=SKEY" > ~/.aws/config
+aws s3 cp s3://BUCKET_NAME/RUN_NAME/runparams/passwd /scratch/ --region REALM
+sudo bash -c "cat /scratch/passwd >> /etc/passwd"
 
 sudo usermod -a -G docker USER
 sudo service docker restart
 
-printf "[default]\naws_access_key_id=AKEY\naws_secret_access_key=SKEY" > ~/.aws/config
-
 iname=$(wget -q -O - http://169.254.169.254/latest/meta-data/instance-id)
 aws --region us-east-1 --output text ec2 create-tags --resources $iname --tags Key=Name,Value=docker-USER-NUM
 
+# Set up GPU device
 GPUMODE=GPUMODE_PARAM
 if [ $GPUMODE = true ]; then
 	/sbin/modprobe nvidia 
@@ -80,11 +80,29 @@ if [ $GPUMODE = true ]; then
 	fi
 fi
 
-sudo -u USER bash -c "cat /cluster/ec2/tmp/RUNCMD | parallel -j 100% 2>&1 | tee /cluster/ec2/$iname.txt"
+# Scp running commands from s3
+sudo mkdir /scratch/input
+sudo mkdir /scratch/output
+sudo mkdir /scratch/runcmd
+sudo mkdir /scratch/log
+sudo chmod -R 777 /scratch/input
+sudo chmod -R 777 /scratch/output
+sudo chmod -R 777 /scratch/runcmd
+sudo chmod -R 777 /scratch/log
+
+aws s3 cp s3://BUCKET_NAME/RUN_NAME/input /scratch/input --region REALM --recursive
+aws s3 cp s3://BUCKET_NAME/RUN_NAME/runcmd /scratch/runcmd --region REALM --recursive
+
+# Run the scripts
+sudo -u USER bash -c "cat /scratch/runcmd/RUNCMD | parallel -j 100% 2>&1 | tee /scratch/log/$iname.txt"
+
+# Postprocess
 aws ses send-email --from thashim@csail.mit.edu --to EMAIL --text "$(tail -n 50 /var/log/cloud-init-output.log)" --subject ec2_run_complete --region REALM
-cp /var/log/cloud-init-output.log /tmp/nohup.txt
+cp /var/log/cloud-init-output.log /scratch/log/$iname-nohup.txt
+aws s3 cp /scratch/output s3://BUCKET_NAME/RUN_NAME/output --region REALM --recursive
+aws s3 cp /scratch/log s3://BUCKET_NAME/RUN_NAME/log --region REALM --recursive
+
+# Terminate the process
 sirname=$(aws --region us-east-1 --output text ec2 describe-spot-instance-requests | grep $iname | cut -d$'\t' -f6)
-rm -f RUNCMD
-aws ec2 cancel-spot-instance-requests --spot-instance-request-ids $sirname --region REALM
-sudo -u USER bash -c "cp /tmp/nohup.txt /cluster/ec2/$iname-nohup.txt"
-aws ec2 terminate-instances --instance-ids $iname --region REALM
+#aws ec2 cancel-spot-instance-requests --spot-instance-request-ids $sirname --region REALM
+#aws ec2 terminate-instances --instance-ids $iname --region REALM

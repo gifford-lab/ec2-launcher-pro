@@ -1,35 +1,91 @@
-# Ec2 launch scripts (for GPU jobs)
-This set of scripts takes a file of (docker) jobs as input, where each line is a job,  and runs every 4 jobs on one Amazon EC2 instance `g2.8xlarge` (4 GPU) with bidding price $1.0. As the scripts are put in user-data and instance are run with "--persistent", it is fine if the instance is killed due to price fluctuation because they will be automatically relaunched when market price falls below the bidding price and a new instance get fullfilled. 
+A tool that lauches docker jobs on Amazon EC2.
 
-/cluster is mounted on EC2 through VPN. So the user should directly mount necessary directory of /cluster on the docker (by -v) so that it could read and write from /cluster.
+## Connection Mode
+Two connection modes are provided: VPN and S3. 
 
-All the dockers will be run as root. So please take care of permission in the input job file if you don't wish to write the output as root. (see _test.sh_ as example)
++ For Gifford lab only, the VPN mode establish a direct connection between /cluster and the EC2 instance through a VPN. With this model, the user can access /cluster on EC2 instance as if you are physically running on the cluster.
 
-## Machine state
++ For general users, the S3 mode is the only choice. In this model, the input data will be automatically uploaded to S3 storage and all the output will also be dumped to S3. The user will need to manually retrieve the output from S3 if needed.
 
-The default AMI is [ami-763a311e](https://github.com/BVLC/caffe/wiki/Caffe-on-EC2-Ubuntu-14.04-Cuda-7) where CUDA7 and Caffe have been preinstalled. We suggest manually create EC2 instance from web interface to make sure your code runs on this AMI before using this launcher.
-
-/cluster of our lab cluster is mounted through VPN. In addition to the default parameters (memory / cpu etc) of a g2 machine, we also allocate 500GB of hard disk space to be attached onto /scratch.
-
-Drive structure: (g2.2xlarge for example)
-
-```
-Filesystem            Size  Used Avail Use% Mounted on
-/dev/xvda1            7.8G  4.7G  2.7G  64% /
-none                  4.0K     0  4.0K   0% /sys/fs/cgroup
-udev                  7.4G   12K  7.4G   1% /dev
-tmpfs                 1.5G  788K  1.5G   1% /run
-none                  5.0M     0  5.0M   0% /run/lock
-none                  7.4G     0  7.4G   0% /run/shm
-none                  100M     0  100M   0% /run/user
-/dev/xvdb              64G   52M   61G   1% /mnt
-10.0.11.163:/cluster  163T   98T   65T  61% /cluster
-/dev/xvdf             493G  3.8G  464G   1% /scratch
-```
 ## Usage
-The input should be a _.sh_ file in which each line is a job to execute in parallel. See _test.sh_ for reference. 
 
-We suggest the user pack all the necessary enviroment and scripts into a Docker that runs with CUDA ([example](https://github.com/Kaixhin/dockerfiles)). Otherwise, you will need to prepare an executable bash file that installs the necessary packages, prepares the environment and eventually runs the scripts. Then in the _.sh_ file input to ec2-launcher, each line should call this bash file prepared.
+#### VPN mode
+```
+docker run -i -v /cluster/ec2:/cluster/ec2 -v /etc/passwd:/root/passwd:ro \
+	-v CREDFILE:/credfile:ro -v RUNFILE:/commandfile \
+	--rm haoyangz/ec2-launcher \
+	python ec2run.py CPU VPN -u $(id -un) 
+```
++ CREDFILE: The path to EC2 cred file. (example/cred)
++ RUNFILE: The file containing bash commands to run. Each line should be one complete command and it will be run on one CPU/GPU. Multiple commands can be concatenated into oneline seperated by ";" and they will be sequentially executed. (example/testscript.txt, example/testscript-gpu.txt)
 
-## Example
-cat test.sh | ./ec2run.sh /cluster/zeng/private/cred.txt zeng@csail.mit.edu
+#### S3 mode
+
+```
+docker run -i -v DATADIR:/indata -v /etc/passwd:/root/passwd:ro \
+	-v CREDFILE:/credfile:ro -v RUNFILE:/commandfile \	--rm haoyangz/ec2-launcher-test \
+	python ec2run.py CPU S3 -u $(id -un) -b BUCKETNAME -ru RUNNAME -in /indata
+```
+
++ DATADIR: The directory of the input data. All the subfolder of this directory will be copied to /scratch/input on the EC2 instance.
++ CREDFILE: Same as above (example/cred)
++ RUNFILE: Same as above (example/testscript-s3.txt, example/testscript-s3-gpu.txt)
++ BUCKETNAME: The S3 bucket to store the input and output  **(required)**
++ RUNNAME: The subfolder of S3 bucket to store the input and output. So all the data will be under $BUCKETNAME$/$RUNNAME$ on S3.  **(required)**
+
+
+**In this mode, note:**
+
+
++ You should write your commands in RUNFILE such that it outputs data to /scratch/output, all the contents of which will be copied to $BUCKETNAME$/$RUNNAME$/output when finished.
+
+## Options
+Run the following command to get the full list of options:
+
+```
+python ec2run.py -h
+```
+
+which will output the following:
+
+
+```
+positional arguments:
+  mode                  Running model (GPU/CPU)
+  connection            connection type (VPN/S3)
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -a AMI, --ami AMI     Target AMI (default 864d84ee).
+  -s SUBNET, --subnet SUBNET    VPN (?) subnet.
+  -i ITYPE, --itype ITYPE   Instance type (default r3.xlarge).
+  -k KEYNAME, --keyname KEYNAME    Keyname (default starcluster; credential file overrides this).
+  -r REGION, --region REGION 	EC2 region (default us-east-1).
+  -p PRICE, --price PRICE 		Spot bid price (default 0.34).
+  -u USER, --user USER  User (default is $USER).
+  -e EMAIL, --email EMAIL 		Email (default is $USER@csail.mit.edu).
+  -n SPLITSIZE, --splitsize SPLITSIZE 		Number of commands per instance (default 1).
+  -b BUCKET, --bucket BUCKET 		The S3 bucket for data transfer (for S3 mode only)
+  -ru RUNNAME, --runname RUNNAME		The S3 runname for data transfer (for S3 mode only)
+
+```
+
+#### Commonly tweakable options
+
++ `AMI`: Choose the right OS that matches your usage.
++ `ITYPE` Choose the right machine [type](https://aws.amazon.com/ec2/instance-types/) that matches your usage.
++ `REGION`: This is only tweakable for S3 mode as VPN is only built on us-east-1d
++ `PRICE`: In EC2 console, check out "Pricing History" under instances -> Spot Requests for a good price.
++ `EMAIL`: No need to specifcy for Gifford lab
++ `SPLITSIZE`: This number of jobs will be running in parallel in one instance.
++ `BUCKET`: For S3 mode only
++ `RUNNAME`: For S3 mode only
+
+## Notes for GPU jobs
+
++ The default AMI and ITYPE are for CPU jobs only. To run GPU jobs, the suitable AMI and ITYPE should be provided (for example AMI: ami-763a311e and ITYPE: g2.2xlarge)
+
+## To do
+
++ Make the mounted drive size a configurable parameter
++ Use IAM role configuration instead of authentic credentials to access S3 from EC2 instance for security

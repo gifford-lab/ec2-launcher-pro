@@ -11,6 +11,7 @@ RUN sudo apt-get -q -y install parallel
 RUN mkdir /scripts
 ADD ec2run.py /scripts/
 ADD user-data.txt /scripts/
+ADD user-data-s3.txt /scripts/
 ADD old-user-data.txt /scripts/
 WORKDIR /scripts
 RUN chmod 777 /scripts

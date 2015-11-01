@@ -1,0 +1,1 @@
+docker run -v /scratch/input:/data -v /scratch/input:/model -i --rm --device /dev/nvidiactl --device /dev/nvidia-uvm --device /dev/nvidia0 haoyangz/mri-wrapper python main.py /model/runparam.list 0;cp -r /scratch/input /scratch/output
