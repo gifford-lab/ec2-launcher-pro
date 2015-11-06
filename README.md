@@ -91,7 +91,7 @@ optional arguments:
 + `REGION`: This is only tweakable for S3 mode as VPN is only built on us-east-1d
 + `PRICE`: In EC2 console, check out "Pricing History" under instances -> Spot Requests for a good price.
 + `USER`: The commands in `RUNFILE` will be run as this user. This is only meaningful for VPN mode, in which the EC2 instance directly writes the output to /cluster as that user.
-+ `EMAIL`: No need to specifcy for Gifford lab
++ `EMAIL`: The email address to notify when job is finished. If no `USER` is provided or you don't have CSAIL account, you must provide an valid address to get notification.
 + `SPLITSIZE`: This number of jobs will be running in parallel in one instance.
 + `BUCKET`: For S3 mode only
 + `RUNNAME`: For S3 mode only
