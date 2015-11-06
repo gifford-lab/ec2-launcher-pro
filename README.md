@@ -28,7 +28,7 @@ Then
 ```
 docker run -i -v /cluster/ec2:/cluster/ec2 -v /etc/passwd:/root/passwd:ro \
 	-v CREDFILE:/credfile:ro -v RUNFILE:/commandfile \
-	--rm haoyangz/ec2-launcher \
+	--rm haoyangz/ec2-launcher-pro \
 	python ec2run.py CPU VPN -u $(id -un) 
 ```
 + `CREDFILE`: The path to EC2 cred file. (example/cred)
@@ -40,7 +40,7 @@ docker run -i -v /cluster/ec2:/cluster/ec2 -v /etc/passwd:/root/passwd:ro \
 ```
 docker run -i -v DATADIR:/indata -v /etc/passwd:/root/passwd:ro \
 	-v CREDFILE:/credfile:ro -v RUNFILE:/commandfile \
-	--rm haoyangz/ec2-launcher \
+	--rm haoyangz/ec2-launcher-pro \
 	python ec2run.py CPU S3 -b BUCKETNAME -ru RUNNAME
 ```
 
