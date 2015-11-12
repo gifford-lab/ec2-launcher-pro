@@ -29,10 +29,11 @@ Then
 docker run -i -v /cluster/ec2:/cluster/ec2 -v /etc/passwd:/root/passwd:ro \
 	-v CREDFILE:/credfile:ro -v RUNFILE:/commandfile \
 	--rm haoyangz/ec2-launcher-pro \
-	python ec2run.py CPU VPN -u $(id -un) 
+	python ec2run.py CPU VPN EMAIL -u $(id -un) 
 ```
 + `CREDFILE`: The path to EC2 cred file. (example/cred)
 + `RUNFILE`: The file containing bash commands to run. Each line should be one complete bash command which will be run as one job (process). To specify the number of jobs per instance, checkout the "Option" section below. If needed, multiple bash commands can be concatenated into oneline seperated by ";" and they will be sequentially executed. (example/testscript.txt, example/testscript-gpu.txt)
++ `EMAIL`: the mail address to get notified when jobs is done.
 + `-u $(id -un)`: this is not required but suggested. See "Options" section for more details.
 
 #### S3 mode
@@ -41,12 +42,13 @@ docker run -i -v /cluster/ec2:/cluster/ec2 -v /etc/passwd:/root/passwd:ro \
 docker run -i -v DATADIR:/indata -v /etc/passwd:/root/passwd:ro \
 	-v CREDFILE:/credfile:ro -v RUNFILE:/commandfile \
 	--rm haoyangz/ec2-launcher-pro \
-	python ec2run.py CPU S3 -b BUCKETNAME -ru RUNNAME
+	python ec2run.py CPU S3 EMAIL -b BUCKETNAME -ru RUNNAME
 ```
 
 + `DATADIR`: The directory of the input data. All the subfolder of this directory will be recursively copied to $BUCKETNAME$/$RUNNAME$/input on S3 and then to /scratch/input on the EC2 instance. Therefore, configure your commands in RUNFILE to get data from /scratch/input
 + `RUNFILE`: **Note** You should configure your commands in RUNFILE to output to /scratch/output, all the contents of which will be copied to S3 folder $BUCKETNAME$/$RUNNAME$/output when finished. (example/testscript-s3.txt, example/testscript-s3-gpu.txt)
 + `CREDFILE`: Same as in VPN mode (example/cred)
++ `EMAIL`: Same as in VPN mode
 + `BUCKETNAME`: The S3 bucket to store the input and output  **(required)**
 + `RUNNAME`: The subfolder of S3 bucket to store the input and output. So all the data will be under $BUCKETNAME$/$RUNNAME$ on S3.  **(required)**
 
@@ -66,7 +68,8 @@ which will output the following:
 positional arguments:
   mode                  Running model (GPU/CPU)
   connection            connection type (VPN/S3)
-
+  email 				Email address to get notified
+  
 optional arguments:
   -h, --help            				show this help message and exit
   -a AMI, --ami AMI     				Target AMI (default 864d84ee).
@@ -76,7 +79,6 @@ optional arguments:
   -r REGION, --region REGION 			EC2 region (default us-east-1).
   -p PRICE, --price PRICE 				Spot bid price (default 0.34).
   -u USER, --user USER  				User (default is $USER).
-  -e EMAIL, --email EMAIL 				Email (default is $USER@csail.mit.edu).
   -n SPLITSIZE, --splitsize SPLITSIZE	Number of commands per instance (default 1).
   -b BUCKET, --bucket BUCKET 			The S3 bucket for data transfer (for S3 mode only)
   -ru RUNNAME, --runname RUNNAME		The S3 runname for data transfer (for S3 mode only)
@@ -91,7 +93,6 @@ optional arguments:
 + `REGION`: This is only tweakable for S3 mode as VPN is only built on us-east-1d
 + `PRICE`: In EC2 console, check out "Pricing History" under instances -> Spot Requests for a good price.
 + `USER`: The commands in `RUNFILE` will be run as this user. This is only meaningful for VPN mode, in which the EC2 instance directly writes the output to /cluster as that user.
-+ `EMAIL`: The email address to notify when job is finished. If no `USER` is provided or you don't have CSAIL account, you must provide an valid address to get notification.
 + `SPLITSIZE`: This number of jobs will be running in parallel in one instance.
 + `BUCKET`: For S3 mode only
 + `RUNNAME`: For S3 mode only
