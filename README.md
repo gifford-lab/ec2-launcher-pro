@@ -1,5 +1,9 @@
 A tool that lauches docker jobs on Amazon EC2.
 
+## Optional prerequisite
++ To enable email notification after job is done, register your Amazon account for Amazon Simple Email Service (SES) (set up in your Amazon EC2 console)
+
+
 ## Connection Mode
 Two connection modes are provided: VPN and S3. 
 

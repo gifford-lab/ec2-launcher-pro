@@ -97,7 +97,7 @@ aws s3 cp s3://BUCKET_NAME/RUN_NAME/runcmd /scratch/runcmd --region REALM --recu
 sudo -u USER bash -c "cat /scratch/runcmd/RUNCMD | parallel -j 100% 2>&1 | tee /scratch/log/$iname.txt"
 
 # Postprocess
-aws ses send-email --from thashim@csail.mit.edu --to EMAIL --text "$(tail -n 50 /var/log/cloud-init-output.log)" --subject ec2_run_complete --region REALM
+aws ses send-email --from EMAIL --to EMAIL --text "$(tail -n 50 /var/log/cloud-init-output.log)" --subject ec2_run_complete --region REALM
 cp /var/log/cloud-init-output.log /scratch/log/$iname-nohup.txt
 aws s3 cp /scratch/output s3://BUCKET_NAME/RUN_NAME/output --region REALM --recursive
 aws s3 cp /scratch/log s3://BUCKET_NAME/RUN_NAME/log --region REALM --recursive
