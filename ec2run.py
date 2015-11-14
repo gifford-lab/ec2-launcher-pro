@@ -27,6 +27,7 @@ def make_userdata(args):
               "USER" : args.user,
               "REALM" : args.region,
               "EMAIL" : args.email,
+              "SEND_EMAIL" : args.email!="",
               "AKEY" : args.remote_access_key,
               "SKEY" : args.remote_secret_key,
               "GPUMODE_PARAM" : args.gpumode,
@@ -78,7 +79,6 @@ def parse_args():
     # Positional (unnamed) arguments:
     parser.add_argument("mode",  type=str, help="Running model (GPU/CPU)")
     parser.add_argument("connection",  type=str, help="connection type (VPN/S3)")
-    parser.add_argument("email", type=str, help="Email address to get notified")
     #parser.add_argument("userdata", type=argparse.FileType("r"), help="Userdata file to user as a template.")
     #parser.add_argument("credfile", type=argparse.FileType("r"), help="Credentials file.")
     #parser.add_argument("commandfile", default="-", nargs="?", type=argparse.FileType("r"), help="Command file (default stdin).")
@@ -91,6 +91,7 @@ def parse_args():
     parser.add_argument("-r", "--region", dest="region", default="us-east-1", help="EC2 region (default us-east-1).")
     parser.add_argument("-p", "--price", dest="price", type=float, default=0.34, help="Spot bid price (default 0.34).")
     parser.add_argument("-u", "--user", dest="user", default=user, help="User (default is $USER).")
+    parser.add_argument("-e", "--email", dest="email",default="", help="Email address to send and get notification")
     parser.add_argument("-n", "--splitsize", dest="splitsize", type=int, default=1, help="Number of commands per instance (default 1).")
     parser.add_argument("-b", "--bucket", dest="bucket", default="", help="The S3 bucket for data transfer (for S3 mode only)")
     parser.add_argument("-ru", "--runname", dest="runname", default="", help="The S3 runname for data transfer (for S3 mode only)")

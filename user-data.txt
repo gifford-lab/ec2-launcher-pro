@@ -81,7 +81,10 @@ if [ $GPUMODE = true ]; then
 fi
 
 sudo -u USER bash -c "cat /cluster/ec2/tmp/RUNCMD | parallel -j 100% 2>&1 | tee /cluster/ec2/$iname.txt"
-aws ses send-email --from EMAIL --to EMAIL --text "$(tail -n 50 /var/log/cloud-init-output.log)" --subject ec2_run_complete --region REALM
+SENDEMAIL=SEND_EMAIL
+if [ $SENDEMAIL = true ]; then
+	aws ses send-email --from EMAIL --to EMAIL --text "$(tail -n 50 /var/log/cloud-init-output.log)" --subject ec2_run_complete --region REALM
+fi
 cp /var/log/cloud-init-output.log /tmp/nohup.txt
 sirname=$(aws --region us-east-1 --output text ec2 describe-spot-instance-requests | grep $iname | cut -d$'\t' -f6)
 rm -f RUNCMD
