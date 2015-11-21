@@ -27,7 +27,7 @@ def make_userdata(args):
               "USER" : args.user,
               "REALM" : args.region,
               "EMAIL" : args.email,
-              "SEND_EMAIL" : args.email!="",
+              "SEND_EMAIL" : 'true' if args.email!="" else 'false',
               "AKEY" : args.remote_access_key,
               "SKEY" : args.remote_secret_key,
               "GPUMODE_PARAM" : args.gpumode,
