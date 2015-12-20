@@ -21,7 +21,8 @@ def parse_cred_file(fin):
 # Assembles the userdata string from various arguments.
 def make_userdata(args):
 
-    userdata = args.userdata.read()
+    with open(args.userdata) as f:
+        userdata = f.read()
 
     params = {"NUM" : args.index,
               "USER" : args.user,
@@ -159,7 +160,8 @@ if __name__ == "__main__":
         print 'ERROR: Unrecognized connection type: ' + args.connection
         sys.exit(1)
 
-    args.userdata = open(args.userdata)
+
+
 
     commands = args.commandfile.readlines()
 
@@ -189,6 +191,5 @@ if __name__ == "__main__":
     runstr.close()
     os.system('cat runstr.txt | parallel -j 16')
     os.system('cat runstr.txt')
-    args.userdata.close()
     args.credfile.close()
     args.commandfile.close()
