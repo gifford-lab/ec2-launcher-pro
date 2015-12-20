@@ -27,7 +27,7 @@ def make_userdata(args):
     params = {"NUM" : args.index,
               "USER" : args.user,
               "REALM" : args.region,
-              "EMAIL" : args.email,
+              "EMAILADDR" : args.email,
               "SEND_EMAIL" : 'true' if args.email!="" else 'false',
               "AKEY" : args.remote_access_key,
               "SKEY" : args.remote_secret_key,
