@@ -10,9 +10,11 @@ Two connection modes are provided: VPN and S3.
 
 ## Example Usage
 
-#### VPN mode
+#### VPN mode 
 
-First check if the VPN is up by
+[CPU example](https://github.com/gifford-lab/ec2-launcher-pro/blob/master/example/run_vpn_cpu.sh),[GPU example](https://github.com/gifford-lab/ec2-launcher-pro/blob/master/example/run_vpn_gpu.sh)
+
+First check if the VPN is up by running the following on sox2:
 
 ```
 if ping -c 5 172.16.0.95 &> /dev/null
@@ -31,24 +33,27 @@ docker pull haoyangz/ec2-launcher-pro
 docker run -i -v /cluster/ec2:/cluster/ec2 -v /etc/passwd:/root/passwd:ro \
 	-v CREDFILE:/credfile:ro -v RUNFILE:/commandfile \
 	--rm haoyangz/ec2-launcher-pro \
-	python ec2run.py CPU VPN 
+	python ec2run.py MODE VPN 
 ```
++ `MODE`: CPU or GPU
 + `CREDFILE`: The absolute path to EC2 cred file. ([example](https://github.com/gifford-lab/ec2-launcher-pro/blob/master/example/cred))
 + `RUNFILE`: The absolute path to a file containing bash commands to run. Each line should be one complete bash command which will be run as one job (process). To specify the number of jobs per instance, checkout the "Option" section below. If needed, multiple bash commands can be concatenated into oneline seperated by ";" and they will be sequentially executed. (example:[CPU](https://github.com/gifford-lab/ec2-launcher-pro/blob/master/example/testscript.txt)
   [GPU](https://github.com/gifford-lab/ec2-launcher-pro/blob/master/example/testscript-gpu.txt))
 
-#### S3 mode
+#### S3 mode 
+[CPU example](https://github.com/gifford-lab/ec2-launcher-pro/blob/master/example/run_s3_cpu.sh),[GPU example](https://github.com/gifford-lab/ec2-launcher-pro/blob/master/example/run_s3_gpu.sh)
 
 ```
 docker pull haoyangz/ec2-launcher-pro
 docker run -i -v DATADIR:/indata -v /etc/passwd:/root/passwd:ro \
 	-v CREDFILE:/credfile:ro -v RUNFILE:/commandfile \
 	--rm haoyangz/ec2-launcher-pro \
-	python ec2run.py CPU S3 -b BUCKETNAME -ru RUNNAME
+	python ec2run.py MODE S3 -b BUCKETNAME -ru RUNNAME
 ```
 + `DATADIR`: The absolute directory of the input data. All the subfolder of this directory will be recursively copied to $BUCKETNAME$/$RUNNAME$/input on S3 and then to /scratch/input on the EC2 instance. Therefore, configure your commands in RUNFILE to get data from /scratch/input
-+ `RUNFILE`: Similar to that in VPN mode. *Note* You should configure your commands in RUNFILE to output to /scratch/output, all the contents of which will be copied to S3 folder $BUCKETNAME$/$RUNNAME$/output when finished. (example:[CPU](https://github. com/gifford-lab/ec2-launcher-pro/blob/master/example/testscript-s3.txt)[GPU](https://github.com/gifford-lab/ec2-launcher-pro/blob/master/example/testscript-s3-gpu.txt)) 
 + `CREDFILE`: Same as in VPN mode ([example](https://github.com/gifford-lab/ec2-launcher-pro/blob/master/example/cred))
++ `RUNFILE`: Similar to that in VPN mode. *Note* You should configure your commands in RUNFILE to output to /scratch/output, all the contents of which will be copied to S3 folder $BUCKETNAME$/$RUNNAME$/output when finished. (example:[CPU](https://github. com/gifford-lab/ec2-launcher-pro/blob/master/example/testscript-s3.txt)[GPU](https://github.com/gifford-lab/ec2-launcher-pro/blob/master/example/testscript-s3-gpu.txt)) 
++ `MODE`: CPU or GPU
 + `BUCKETNAME`: The S3 bucket to store the input and output  **(required)**
 + `RUNNAME`: The subfolder of S3 bucket to store the input and output. So all the data will be under $BUCKETNAME$/$RUNNAME$ on S3.  **(required)**
 
@@ -70,7 +75,7 @@ positional arguments:
   
 optional arguments:
   -h, --help            				show this help message and exit
-  -a AMI, --ami AMI     				Target AMI (default 864d84ee).
+  -a AMI, --ami AMI     				Target AMI (default ami-864d84ee for CPU mode, ami-763a311e for GPU mode).
   -s SUBNET, --subnet SUBNET    		VPN (?) subnet.
   -i ITYPE, --itype ITYPE   			Instance type (default r3.xlarge).
   -k KEYNAME, --keyname KEYNAME			Keyname (default starcluster; credential file overrides this).
@@ -86,8 +91,8 @@ optional arguments:
 ```
 
 #### Commonly tweakable options
-+ `AMI`: Choose the right OS that matches your usage. Default value is for CPU mode only.
-+ `ITYPE` Choose the right machine [type](https://aws.amazon.com/ec2/instance-types/) that matches your usage. Default value is for CPU mode only.
++ `AMI`: Choose the right OS that matches your usage. 
++ `ITYPE` Choose the right machine [type](https://aws.amazon.com/ec2/instance-types/) that matches your usage. 
 + `PRICE`: In EC2 console, check out "Pricing History" under instances -> Spot Requests for a good price for your region and instance type.
 + `EMAIL`:  If an address is provided, a notification email will be sent from this address to itself every time an EC2 instance finishes. This address has to be added to the list of "verified sender" in your EC2 Simple Email Service console.
 + `SPLITSIZE`: This number of jobs will be running in parallel in one instance.
@@ -101,10 +106,6 @@ optional arguments:
 + `BUCKET`: The S3 bucket to store the input and output
 + `RUNNAME`: The S3 folder in the bucket to store the input and output
 
-## Notes for GPU jobs
-+ The default AMI and ITYPE are for CPU jobs only. To run GPU jobs, the suitable AMI and ITYPE should be provided (for example AMI: ami-763a311e and ITYPE: g2.2xlarge)
-
 ## To do
-
 + ~~Make the mounted drive size a configurable parameter~~
 + Use IAM role configuration instead of authentic credentials to access S3 from EC2 instance for security

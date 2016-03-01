@@ -85,7 +85,7 @@ def parse_args():
     #parser.add_argument("commandfile", default="-", nargs="?", type=argparse.FileType("r"), help="Command file (default stdin).")
 
     # Optional arguments:
-    parser.add_argument("-a", "--ami", dest="ami", default="ami-864d84ee", help="Target AMI (default 864d84ee).")
+    parser.add_argument("-a", "--ami", dest="ami", default="ami-864d84ee", help="Target AMI (default ami-864d84ee).")
     parser.add_argument("-s", "--subnet", dest="subnet", default="subnet-f85957d0", help="VPN (?) subnet.")
     parser.add_argument("-i", "--itype", dest="itype", default="r3.xlarge", help="Instance type (default r3.xlarge).")
     parser.add_argument("-k", "--keyname", dest="keyname", default="starcluster", help="Keyname (default starcluster; credential file overrides this).")
@@ -106,6 +106,10 @@ if __name__ == "__main__":
         args.gpumode = 'false'
     elif args.mode == 'GPU':
         args.gpumode = 'true'
+        if args.ami == "ami-864d84ee":
+            args.ami = "ami-763a311e"
+        if args.itype == "r3.xlarge":
+            args.itype = "g2.2xlarge"
     else:
         print 'ERROR: Unrecognized mode: ' + args.mode
         sys.exit(1)
