@@ -85,13 +85,13 @@ def parse_args():
     #parser.add_argument("commandfile", default="-", nargs="?", type=argparse.FileType("r"), help="Command file (default stdin).")
 
     # Optional arguments:
-    parser.add_argument("-a", "--ami", dest="ami", default="ami-864d84ee", help="Target AMI (default ami-864d84ee).")
+    parser.add_argument("-a", "--ami", dest="ami", default="ami-864d84ee", help="Target AMI (default ami-864d84ee for CPU mode, and 763a311e for GPU mode).")
     parser.add_argument("-s", "--subnet", dest="subnet", default="subnet-f85957d0", help="VPN (?) subnet.")
-    parser.add_argument("-i", "--itype", dest="itype", default="r3.xlarge", help="Instance type (default r3.xlarge).")
+    parser.add_argument("-i", "--itype", dest="itype", default="r3.xlarge", help="Instance type (default r3.xlarge for CPU mode, and g2.2xlarge for GPU  mode).")
     parser.add_argument("-k", "--keyname", dest="keyname", default="starcluster", help="Keyname (default starcluster; credential file overrides this).")
-    parser.add_argument("-r", "--region", dest="region", default="us-east-1", help="EC2 region (default us-east-1).")
+    parser.add_argument("-r", "--region", dest="region", default="us-east-1", help="EC2 region (for S3 mode only, default us-east-1).")
     parser.add_argument("-p", "--price", dest="price", type=float, default=0.34, help="Spot bid price (default 0.34).")
-    parser.add_argument("-u", "--user", dest="user", default=user, help="User (default is $USER).")
+    parser.add_argument("-u", "--user", dest="user", default=user, help="User (for VPN mode only, default is $USER).")
     parser.add_argument("-e", "--email", dest="email",default="", help="Email address to send and get notification")
     parser.add_argument("-n", "--splitsize", dest="splitsize", type=int, default=1, help="Number of commands per instance (default 1).")
     parser.add_argument("-b", "--bucket", dest="bucket", default="", help="The S3 bucket for data transfer (for S3 mode only)")
