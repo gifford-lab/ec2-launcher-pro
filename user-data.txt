@@ -80,6 +80,7 @@ if [ $GPUMODE = true ]; then
 	fi
 fi
 
+cp /cluster/ec2/tmp/RUNCMD /cluster/ec2/tmp/${iname}_cmd.txt
 sudo -u USER bash -c "cat /cluster/ec2/tmp/RUNCMD | parallel -j 100% 2>&1 | tee /cluster/ec2/$iname.txt"
 SENDEMAIL=SEND_EMAIL
 if [ $SENDEMAIL = true ]; then
