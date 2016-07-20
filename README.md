@@ -92,6 +92,7 @@ optional arguments:
   -n SPLITSIZE, --splitsize SPLITSIZE   Number of commands per instance (default 1).
   -b BUCKET, --bucket BUCKET            The S3 bucket for data transfer (for S3 mode only)
   -ru RUNNAME, --runname RUNNAME        The S3 runname for data transfer (for S3 mode only)
+  -z ZONE, --zone ZONE                  The S3 runname for data transfer (for S3 mode only)
   -v VOLSIZE, --volumesize VOLSIZE      The size (in GB) of hard disck (/scratch) added to each EC2 instance (default 500)
 ```
 
@@ -107,7 +108,8 @@ optional arguments:
 + `USER`: The commands in `RUNFILE` will read and write data on /cluster as this user. The default is to run as current user. 
 
 #### S3 mode only (Default value can be found above)
-+ `REGION`: This is only tweakable for S3 mode as VPN is only built on us-east-1d. 
++ `REGION`: This is only tweakable for S3 mode as VPN is only built on us-east-1.
++ `ZONE`: The specific zone in which you wish to launch your instance, for example us-east-1a. Default is to let EC2 choose from all zones under `REGION` you specified based on availability.
 + `BUCKET`: The S3 bucket to store the input and output.  **(required, no defalt value)**
 + `RUNNAME`: The S3 folder in the bucket to store the input and output.  **(required, no defalt value)**
 
