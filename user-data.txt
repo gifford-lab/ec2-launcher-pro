@@ -87,7 +87,7 @@ if [ $SENDEMAIL = true ]; then
 	aws ses send-email --from EMAILADDR --to EMAILADDR --text "$(tail -n 50 /var/log/cloud-init-output.log)" --subject ec2_run_complete --region REALM
 fi
 cp /var/log/cloud-init-output.log /tmp/nohup.txt
-sirname=$(aws --region us-east-1 --output text ec2 describe-spot-instance-requests | grep $iname | cut -d$'\t' -f7)
+sirname=$(aws --region us-east-1 --output text ec2 describe-spot-instance-requests | grep $iname | cut -d$'\t' -f6)
 rm -f RUNCMD
 aws ec2 cancel-spot-instance-requests --spot-instance-request-ids $sirname --region REALM
 sudo -u USER bash -c "cp /tmp/nohup.txt /cluster/ec2/$iname-nohup.txt"
