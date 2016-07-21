@@ -96,7 +96,7 @@ def parse_args():
     parser.add_argument("-n", "--splitsize", dest="splitsize", type=int, default=1, help="Number of commands per instance (default 1).")
     parser.add_argument("-b", "--bucket", dest="bucket", default="", help="The S3 bucket for data transfer (for S3 mode only)")
     parser.add_argument("-ru", "--runname", dest="runname", default="", help="The S3 runname for data transfer (for S3 mode only)")
-    parser.add_argument("-z", "--zone", dest="zone", default="us-east-1d", help="The S3 runname for data transfer (for S3 mode only)")
+    parser.add_argument("-z", "--zone", dest="zone", default="", help="The specific EC2 zone to launch in (for S3 mode only, default to let EC2 choose)")
     parser.add_argument("-v", "--volumesize", dest="volsize", type=int,default=500, help="The size (in GB) of hard disck (/scratch) added to each EC2 instance (default 500)")
 
     return parser.parse_args()
@@ -164,9 +164,6 @@ if __name__ == "__main__":
     else:
         print 'ERROR: Unrecognized connection type: ' + args.connection
         sys.exit(1)
-
-
-
 
     commands = args.commandfile.readlines()
 

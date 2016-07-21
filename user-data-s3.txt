@@ -85,6 +85,8 @@ sudo mkdir /scratch/input
 sudo mkdir /scratch/output
 sudo mkdir /scratch/runcmd
 sudo mkdir /scratch/log
+sudo mkdir /scratch/instance
+sudo chmod -R 777 /scratch/instance
 sudo chmod -R 777 /scratch/input
 sudo chmod -R 777 /scratch/output
 sudo chmod -R 777 /scratch/runcmd
@@ -92,6 +94,8 @@ sudo chmod -R 777 /scratch/log
 
 aws s3 cp s3://BUCKET_NAME/RUN_NAME/input /scratch/input --region REALM --recursive
 aws s3 cp s3://BUCKET_NAME/RUN_NAME/runcmd /scratch/runcmd --region REALM --recursive
+sudo touch /scratch/instance/$iname
+aws s3 cp /scratch/instance s3://BUCKET_NAME/RUN_NAME/instance --region REALM --recursive
 
 # Run the scripts
 sudo -u USER bash -c "cat /scratch/runcmd/RUNCMD | parallel -j 100% 2>&1 | tee /scratch/log/$iname.txt"

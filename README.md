@@ -1,6 +1,6 @@
 A tool that lauches docker jobs on Amazon EC2 cloud instances (machines).
 
-## Prerequisite
+## Dependencies
 You will need to pack your software in [Docker](www.docker.com) and make it available on [Docker Hub](hub.docker.com).
 
 ## Connection Mode
@@ -14,7 +14,7 @@ Two connection modes are provided: VPN and S3.
 
 #### VPN mode 
 
-[CPU example](https://github.com/gifford-lab/ec2-launcher-pro/blob/master/example/run_vpn_cpu.sh),[GPU example](https://github.com/gifford-lab/ec2-launcher-pro/blob/master/example/run_vpn_gpu.sh)
+Quick examples to run them under **repository directory**: [CPU job](https://github.com/gifford-lab/ec2-launcher-pro/blob/master/example/run_vpn_cpu.sh), [GPU job](https://github.com/gifford-lab/ec2-launcher-pro/blob/master/example/run_vpn_gpu.sh)
 
 First check if the VPN is up by running the following on **sox2**:
 
@@ -47,7 +47,7 @@ docker run -i -v /cluster/ec2:/cluster/ec2 -v /etc/passwd:/root/passwd:ro \
   [GPU](https://github.com/gifford-lab/ec2-launcher-pro/blob/master/example/testscript-gpu.txt))
 
 #### S3 mode 
-[CPU example](https://github.com/gifford-lab/ec2-launcher-pro/blob/master/example/run_s3_cpu.sh),[GPU example](https://github.com/gifford-lab/ec2-launcher-pro/blob/master/example/run_s3_gpu.sh)
+Quick examples to run them under **repository directory**: [CPU jobs](https://github.com/gifford-lab/ec2-launcher-pro/blob/master/example/run_s3_cpu.sh), [GPU jobs](https://github.com/gifford-lab/ec2-launcher-pro/blob/master/example/run_s3_gpu.sh)
 
 ```
 docker pull haoyangz/ec2-launcher-pro
@@ -92,7 +92,7 @@ optional arguments:
   -n SPLITSIZE, --splitsize SPLITSIZE   Number of commands per instance (default 1).
   -b BUCKET, --bucket BUCKET            The S3 bucket for data transfer (for S3 mode only)
   -ru RUNNAME, --runname RUNNAME        The S3 runname for data transfer (for S3 mode only)
-  -z ZONE, --zone ZONE                  The S3 runname for data transfer (for S3 mode only)
+  -z ZONE, --zone ZONE                  The specific EC2 zone to launch in (for S3 mode only, default to let EC2 choose)
   -v VOLSIZE, --volumesize VOLSIZE      The size (in GB) of hard disck (/scratch) added to each EC2 instance (default 500)
 ```
 
