@@ -1,1 +1,1 @@
-docker run -v $(pwd)/example:/data -v $(pwd)/example/model:/model -i --rm --device /dev/nvidiactl --device /dev/nvidia-uvm --device /dev/nvidia0 haoyangz/mri-wrapper python main.py /model/runparam.list 0;cp -r example/16_G /scratch/output/
+docker run -v /scratch/input:/data -v /scratch/input/model:/model -i --rm --device /dev/nvidiactl --device /dev/nvidia-uvm --device /dev/nvidia0 haoyangz/mri-wrapper python main.py /model/runparam.list 0;cp -r /scratch/input/16_G /scratch/output/

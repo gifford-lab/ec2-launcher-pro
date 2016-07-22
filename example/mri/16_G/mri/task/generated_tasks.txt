@@ -1,0 +1,2 @@
+/data/16_G/mri/task/{dropout_ratio- 0.1, momentum- 0.999, delta- 1e-8}/task.json
+/data/16_G/mri/task/{dropout_ratio- 0.5, momentum- 0.99, delta- 1e-6}/task.json

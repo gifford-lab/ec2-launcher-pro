@@ -1,0 +1,14 @@
+net: "trainval.prototxt"
+test_iter: 25
+test_interval: 100
+base_lr: 1.0
+momentum: %{momentum}%
+delta: %{delta}%
+lr_policy: "fixed"
+display: 10000
+max_iter: 6000
+weight_decay: 0.0005
+snapshot: 100
+snapshot_prefix: "train"
+solver_mode: GPU
+solver_type: ADADELTA

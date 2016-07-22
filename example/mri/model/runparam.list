@@ -1,0 +1,11 @@
+MRI_MAXITER  2
+ORDER testEvalCaffe
+search_max_iter 3000
+search_snapshot 10000
+search_test_interval 100
+search_display 10000
+train_trial 2
+debugmode DEBUG
+optimwrt accuracy
+outputlayer prob
+predict_on data/train.txt

@@ -58,7 +58,7 @@ docker run -i -v DATADIR:/indata -v /etc/passwd:/root/passwd:ro \
 ```
 + `DATADIR`: The absolute directory of the input data. All the subfolder of this directory will be recursively copied to $BUCKETNAME$/$RUNNAME$/input on S3 and then to /scratch/input on the EC2 instance. Therefore, configure your commands in RUNFILE to get data from /scratch/input.
 + `CREDFILE`: Same as in VPN mode.
-+ `RUNFILE`: Similar to that in VPN mode. *Note* You should configure your commands in RUNFILE to output to /scratch/output, all the contents of which will be copied to S3 folder $BUCKETNAME$/$RUNNAME$/output when finished. (example:[CPU](https://github. com/gifford-lab/ec2-launcher-pro/blob/master/example/testscript-s3.txt)[GPU](https://github.com/gifford-lab/ec2-launcher-pro/blob/master/example/testscript-s3-gpu.txt)) 
++ `RUNFILE`: Similar to that in VPN mode. *Note* You should configure your commands in RUNFILE to output to /scratch/output, all the contents of which will be copied to S3 folder $BUCKETNAME$/$RUNNAME$/output when finished. (example:[CPU](https://github.com/gifford-lab/ec2-launcher-pro/blob/master/example/testscript-s3.txt)[GPU](https://github.com/gifford-lab/ec2-launcher-pro/blob/master/example/testscript-s3-gpu.txt)) 
 + `MODE`: CPU or GPU
 + `BUCKETNAME`: The S3 bucket to store the input and output.  **(required)**
 + `RUNNAME`: The subfolder of S3 bucket to store the input and output. So all the data will be under $BUCKETNAME$/$RUNNAME$ on S3.  **(required)**

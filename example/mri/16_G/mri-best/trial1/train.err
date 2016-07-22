@@ -1,0 +1,789 @@
+WARNING: Logging before InitGoogleLogging() is written to STDERR
+I0411 19:43:32.816062   110 solver.cpp:54] Initializing solver from parameters: 
+test_iter: 25
+test_interval: 100
+base_lr: 1
+display: 10000
+max_iter: 6000
+lr_policy: "fixed"
+momentum: 0.999
+weight_decay: 0.0005
+snapshot: 100
+snapshot_prefix: "train"
+solver_mode: GPU
+device_id: 0
+net: "trainval.prototxt"
+solver_type: ADADELTA
+delta: 1e-08
+I0411 19:43:32.817824   110 solver.cpp:97] Creating training net from net file: trainval.prototxt
+I0411 19:43:32.819861   110 net.cpp:339] The NetState phase (0) differed from the phase (1) specified by a rule in layer data
+I0411 19:43:32.819929   110 net.cpp:339] The NetState phase (0) differed from the phase (1) specified by a rule in layer accuracy
+I0411 19:43:32.820129   110 net.cpp:50] Initializing net from parameters: 
+name: "EmbedNet"
+state {
+  phase: TRAIN
+}
+layer {
+  name: "data"
+  type: "HDF5Data"
+  top: "data"
+  top: "label"
+  include {
+    phase: TRAIN
+  }
+  hdf5_data_param {
+    source: "/data/data/train.txt"
+    batch_size: 100
+  }
+}
+layer {
+  name: "conv1"
+  type: "Convolution"
+  bottom: "data"
+  top: "conv1"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 16
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+    pad_h: 0
+    pad_w: 12
+    kernel_h: 1
+    kernel_w: 24
+    stride_h: 1
+    stride_w: 1
+  }
+}
+layer {
+  name: "relu1"
+  type: "ReLU"
+  bottom: "conv1"
+  top: "conv1"
+}
+layer {
+  name: "pool1"
+  type: "Pooling"
+  bottom: "conv1"
+  top: "pool1"
+  pooling_param {
+    pool: MAX
+    kernel_h: 1
+    kernel_w: 102
+    stride_h: 1
+    stride_w: 2
+  }
+}
+layer {
+  name: "fc1"
+  type: "InnerProduct"
+  bottom: "pool1"
+  top: "fc1"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 32
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "relu4"
+  type: "ReLU"
+  bottom: "fc1"
+  top: "fc1"
+}
+layer {
+  name: "drop1"
+  type: "Dropout"
+  bottom: "fc1"
+  top: "fc1"
+  dropout_param {
+    dropout_ratio: 0.1
+  }
+}
+layer {
+  name: "fc2"
+  type: "InnerProduct"
+  bottom: "fc1"
+  top: "fc2"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 2
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "loss6"
+  type: "SoftmaxWithLoss"
+  bottom: "fc2"
+  bottom: "label"
+  top: "loss"
+}
+I0411 19:43:32.820261   110 layer_factory.hpp:76] Creating layer data
+I0411 19:43:32.820297   110 net.cpp:110] Creating Layer data
+I0411 19:43:32.820317   110 net.cpp:433] data -> data
+I0411 19:43:32.820358   110 net.cpp:433] data -> label
+I0411 19:43:32.820395   110 hdf5_data_layer.cpp:80] Loading list of HDF5 filenames from: /data/data/train.txt
+I0411 19:43:32.820914   110 hdf5_data_layer.cpp:94] Number of HDF5 files: 3
+I0411 19:43:32.823034   110 hdf5.cpp:35] Datatype class: H5T_INTEGER
+I0411 19:43:32.876044   110 hdf5.cpp:32] Datatype class: H5T_FLOAT
+I0411 19:43:32.876799   110 net.cpp:155] Setting up data
+I0411 19:43:32.876822   110 net.cpp:163] Top shape: 100 4 1 101 (40400)
+I0411 19:43:32.876829   110 net.cpp:163] Top shape: 100 1 (100)
+I0411 19:43:32.876838   110 layer_factory.hpp:76] Creating layer conv1
+I0411 19:43:32.876859   110 net.cpp:110] Creating Layer conv1
+I0411 19:43:32.876865   110 net.cpp:477] conv1 <- data
+I0411 19:43:32.876875   110 net.cpp:433] conv1 -> conv1
+I0411 19:43:32.877789   110 net.cpp:155] Setting up conv1
+I0411 19:43:32.877800   110 net.cpp:163] Top shape: 100 16 1 102 (163200)
+I0411 19:43:32.877816   110 layer_factory.hpp:76] Creating layer relu1
+I0411 19:43:32.877825   110 net.cpp:110] Creating Layer relu1
+I0411 19:43:32.877830   110 net.cpp:477] relu1 <- conv1
+I0411 19:43:32.877836   110 net.cpp:419] relu1 -> conv1 (in-place)
+I0411 19:43:32.877846   110 net.cpp:155] Setting up relu1
+I0411 19:43:32.877856   110 net.cpp:163] Top shape: 100 16 1 102 (163200)
+I0411 19:43:32.877861   110 layer_factory.hpp:76] Creating layer pool1
+I0411 19:43:32.877868   110 net.cpp:110] Creating Layer pool1
+I0411 19:43:32.877873   110 net.cpp:477] pool1 <- conv1
+I0411 19:43:32.877879   110 net.cpp:433] pool1 -> pool1
+I0411 19:43:32.877914   110 net.cpp:155] Setting up pool1
+I0411 19:43:32.877921   110 net.cpp:163] Top shape: 100 16 1 1 (1600)
+I0411 19:43:32.877926   110 layer_factory.hpp:76] Creating layer fc1
+I0411 19:43:32.877938   110 net.cpp:110] Creating Layer fc1
+I0411 19:43:32.877943   110 net.cpp:477] fc1 <- pool1
+I0411 19:43:32.877949   110 net.cpp:433] fc1 -> fc1
+I0411 19:43:32.878463   110 net.cpp:155] Setting up fc1
+I0411 19:43:32.878475   110 net.cpp:163] Top shape: 100 32 (3200)
+I0411 19:43:32.878484   110 layer_factory.hpp:76] Creating layer relu4
+I0411 19:43:32.878491   110 net.cpp:110] Creating Layer relu4
+I0411 19:43:32.878496   110 net.cpp:477] relu4 <- fc1
+I0411 19:43:32.878502   110 net.cpp:419] relu4 -> fc1 (in-place)
+I0411 19:43:32.878509   110 net.cpp:155] Setting up relu4
+I0411 19:43:32.878515   110 net.cpp:163] Top shape: 100 32 (3200)
+I0411 19:43:32.878520   110 layer_factory.hpp:76] Creating layer drop1
+I0411 19:43:32.878530   110 net.cpp:110] Creating Layer drop1
+I0411 19:43:32.878533   110 net.cpp:477] drop1 <- fc1
+I0411 19:43:32.878540   110 net.cpp:419] drop1 -> fc1 (in-place)
+I0411 19:43:32.878561   110 net.cpp:155] Setting up drop1
+I0411 19:43:32.878569   110 net.cpp:163] Top shape: 100 32 (3200)
+I0411 19:43:32.878574   110 layer_factory.hpp:76] Creating layer fc2
+I0411 19:43:32.878582   110 net.cpp:110] Creating Layer fc2
+I0411 19:43:32.878587   110 net.cpp:477] fc2 <- fc1
+I0411 19:43:32.878593   110 net.cpp:433] fc2 -> fc2
+I0411 19:43:32.878664   110 net.cpp:155] Setting up fc2
+I0411 19:43:32.878672   110 net.cpp:163] Top shape: 100 2 (200)
+I0411 19:43:32.878681   110 layer_factory.hpp:76] Creating layer loss6
+I0411 19:43:32.878691   110 net.cpp:110] Creating Layer loss6
+I0411 19:43:32.878696   110 net.cpp:477] loss6 <- fc2
+I0411 19:43:32.878702   110 net.cpp:477] loss6 <- label
+I0411 19:43:32.878710   110 net.cpp:433] loss6 -> loss
+I0411 19:43:32.878721   110 layer_factory.hpp:76] Creating layer loss6
+I0411 19:43:32.878793   110 net.cpp:155] Setting up loss6
+I0411 19:43:32.878801   110 net.cpp:163] Top shape: (1)
+I0411 19:43:32.878805   110 net.cpp:168]     with loss weight 1
+I0411 19:43:32.878823   110 net.cpp:236] loss6 needs backward computation.
+I0411 19:43:32.878829   110 net.cpp:236] fc2 needs backward computation.
+I0411 19:43:32.878834   110 net.cpp:236] drop1 needs backward computation.
+I0411 19:43:32.878837   110 net.cpp:236] relu4 needs backward computation.
+I0411 19:43:32.878841   110 net.cpp:236] fc1 needs backward computation.
+I0411 19:43:32.878846   110 net.cpp:236] pool1 needs backward computation.
+I0411 19:43:32.878850   110 net.cpp:236] relu1 needs backward computation.
+I0411 19:43:32.878855   110 net.cpp:236] conv1 needs backward computation.
+I0411 19:43:32.878859   110 net.cpp:240] data does not need backward computation.
+I0411 19:43:32.878865   110 net.cpp:283] This network produces output loss
+I0411 19:43:32.878872   110 net.cpp:297] Network initialization done.
+I0411 19:43:32.878876   110 net.cpp:298] Memory required for data: 1513204
+I0411 19:43:32.880185   110 solver.cpp:187] Creating test net (#0) specified by net file: trainval.prototxt
+I0411 19:43:32.880275   110 net.cpp:339] The NetState phase (1) differed from the phase (0) specified by a rule in layer data
+I0411 19:43:32.880512   110 net.cpp:50] Initializing net from parameters: 
+name: "EmbedNet"
+state {
+  phase: TEST
+}
+layer {
+  name: "data"
+  type: "HDF5Data"
+  top: "data"
+  top: "label"
+  include {
+    phase: TEST
+  }
+  hdf5_data_param {
+    source: "/data/data/valid.txt"
+    batch_size: 100
+  }
+}
+layer {
+  name: "conv1"
+  type: "Convolution"
+  bottom: "data"
+  top: "conv1"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 16
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+    pad_h: 0
+    pad_w: 12
+    kernel_h: 1
+    kernel_w: 24
+    stride_h: 1
+    stride_w: 1
+  }
+}
+layer {
+  name: "relu1"
+  type: "ReLU"
+  bottom: "conv1"
+  top: "conv1"
+}
+layer {
+  name: "pool1"
+  type: "Pooling"
+  bottom: "conv1"
+  top: "pool1"
+  pooling_param {
+    pool: MAX
+    kernel_h: 1
+    kernel_w: 102
+    stride_h: 1
+    stride_w: 2
+  }
+}
+layer {
+  name: "fc1"
+  type: "InnerProduct"
+  bottom: "pool1"
+  top: "fc1"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 32
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "relu4"
+  type: "ReLU"
+  bottom: "fc1"
+  top: "fc1"
+}
+layer {
+  name: "drop1"
+  type: "Dropout"
+  bottom: "fc1"
+  top: "fc1"
+  dropout_param {
+    dropout_ratio: 0.1
+  }
+}
+layer {
+  name: "fc2"
+  type: "InnerProduct"
+  bottom: "fc1"
+  top: "fc2"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 2
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "loss6"
+  type: "SoftmaxWithLoss"
+  bottom: "fc2"
+  bottom: "label"
+  top: "loss"
+}
+layer {
+  name: "accuracy"
+  type: "Accuracy"
+  bottom: "fc2"
+  bottom: "label"
+  top: "accuracy"
+  include {
+    phase: TEST
+  }
+}
+I0411 19:43:32.880689   110 layer_factory.hpp:76] Creating layer data
+I0411 19:43:32.880717   110 net.cpp:110] Creating Layer data
+I0411 19:43:32.880733   110 net.cpp:433] data -> data
+I0411 19:43:32.880759   110 net.cpp:433] data -> label
+I0411 19:43:32.880781   110 hdf5_data_layer.cpp:80] Loading list of HDF5 filenames from: /data/data/valid.txt
+I0411 19:43:32.881336   110 hdf5_data_layer.cpp:94] Number of HDF5 files: 1
+I0411 19:43:32.902010   110 net.cpp:155] Setting up data
+I0411 19:43:32.902034   110 net.cpp:163] Top shape: 100 4 1 101 (40400)
+I0411 19:43:32.902040   110 net.cpp:163] Top shape: 100 1 (100)
+I0411 19:43:32.902046   110 layer_factory.hpp:76] Creating layer label_data_1_split
+I0411 19:43:32.902061   110 net.cpp:110] Creating Layer label_data_1_split
+I0411 19:43:32.902068   110 net.cpp:477] label_data_1_split <- label
+I0411 19:43:32.902076   110 net.cpp:433] label_data_1_split -> label_data_1_split_0
+I0411 19:43:32.902086   110 net.cpp:433] label_data_1_split -> label_data_1_split_1
+I0411 19:43:32.902117   110 net.cpp:155] Setting up label_data_1_split
+I0411 19:43:32.902127   110 net.cpp:163] Top shape: 100 1 (100)
+I0411 19:43:32.902132   110 net.cpp:163] Top shape: 100 1 (100)
+I0411 19:43:32.902137   110 layer_factory.hpp:76] Creating layer conv1
+I0411 19:43:32.902146   110 net.cpp:110] Creating Layer conv1
+I0411 19:43:32.902151   110 net.cpp:477] conv1 <- data
+I0411 19:43:32.902159   110 net.cpp:433] conv1 -> conv1
+I0411 19:43:32.902330   110 net.cpp:155] Setting up conv1
+I0411 19:43:32.902340   110 net.cpp:163] Top shape: 100 16 1 102 (163200)
+I0411 19:43:32.902353   110 layer_factory.hpp:76] Creating layer relu1
+I0411 19:43:32.902359   110 net.cpp:110] Creating Layer relu1
+I0411 19:43:32.902364   110 net.cpp:477] relu1 <- conv1
+I0411 19:43:32.902370   110 net.cpp:419] relu1 -> conv1 (in-place)
+I0411 19:43:32.902377   110 net.cpp:155] Setting up relu1
+I0411 19:43:32.902384   110 net.cpp:163] Top shape: 100 16 1 102 (163200)
+I0411 19:43:32.902389   110 layer_factory.hpp:76] Creating layer pool1
+I0411 19:43:32.902396   110 net.cpp:110] Creating Layer pool1
+I0411 19:43:32.902400   110 net.cpp:477] pool1 <- conv1
+I0411 19:43:32.902406   110 net.cpp:433] pool1 -> pool1
+I0411 19:43:32.902439   110 net.cpp:155] Setting up pool1
+I0411 19:43:32.902447   110 net.cpp:163] Top shape: 100 16 1 1 (1600)
+I0411 19:43:32.902452   110 layer_factory.hpp:76] Creating layer fc1
+I0411 19:43:32.902462   110 net.cpp:110] Creating Layer fc1
+I0411 19:43:32.902467   110 net.cpp:477] fc1 <- pool1
+I0411 19:43:32.902473   110 net.cpp:433] fc1 -> fc1
+I0411 19:43:32.902559   110 net.cpp:155] Setting up fc1
+I0411 19:43:32.902567   110 net.cpp:163] Top shape: 100 32 (3200)
+I0411 19:43:32.902576   110 layer_factory.hpp:76] Creating layer relu4
+I0411 19:43:32.902583   110 net.cpp:110] Creating Layer relu4
+I0411 19:43:32.902588   110 net.cpp:477] relu4 <- fc1
+I0411 19:43:32.902595   110 net.cpp:419] relu4 -> fc1 (in-place)
+I0411 19:43:32.902601   110 net.cpp:155] Setting up relu4
+I0411 19:43:32.902607   110 net.cpp:163] Top shape: 100 32 (3200)
+I0411 19:43:32.902611   110 layer_factory.hpp:76] Creating layer drop1
+I0411 19:43:32.902618   110 net.cpp:110] Creating Layer drop1
+I0411 19:43:32.902623   110 net.cpp:477] drop1 <- fc1
+I0411 19:43:32.902629   110 net.cpp:419] drop1 -> fc1 (in-place)
+I0411 19:43:32.902649   110 net.cpp:155] Setting up drop1
+I0411 19:43:32.902657   110 net.cpp:163] Top shape: 100 32 (3200)
+I0411 19:43:32.902662   110 layer_factory.hpp:76] Creating layer fc2
+I0411 19:43:32.902670   110 net.cpp:110] Creating Layer fc2
+I0411 19:43:32.902674   110 net.cpp:477] fc2 <- fc1
+I0411 19:43:32.902681   110 net.cpp:433] fc2 -> fc2
+I0411 19:43:32.902757   110 net.cpp:155] Setting up fc2
+I0411 19:43:32.902766   110 net.cpp:163] Top shape: 100 2 (200)
+I0411 19:43:32.902776   110 layer_factory.hpp:76] Creating layer fc2_fc2_0_split
+I0411 19:43:32.902782   110 net.cpp:110] Creating Layer fc2_fc2_0_split
+I0411 19:43:32.902787   110 net.cpp:477] fc2_fc2_0_split <- fc2
+I0411 19:43:32.902793   110 net.cpp:433] fc2_fc2_0_split -> fc2_fc2_0_split_0
+I0411 19:43:32.902801   110 net.cpp:433] fc2_fc2_0_split -> fc2_fc2_0_split_1
+I0411 19:43:32.902830   110 net.cpp:155] Setting up fc2_fc2_0_split
+I0411 19:43:32.902839   110 net.cpp:163] Top shape: 100 2 (200)
+I0411 19:43:32.902844   110 net.cpp:163] Top shape: 100 2 (200)
+I0411 19:43:32.902849   110 layer_factory.hpp:76] Creating layer loss6
+I0411 19:43:32.902856   110 net.cpp:110] Creating Layer loss6
+I0411 19:43:32.902860   110 net.cpp:477] loss6 <- fc2_fc2_0_split_0
+I0411 19:43:32.902866   110 net.cpp:477] loss6 <- label_data_1_split_0
+I0411 19:43:32.902873   110 net.cpp:433] loss6 -> loss
+I0411 19:43:32.902881   110 layer_factory.hpp:76] Creating layer loss6
+I0411 19:43:32.902945   110 net.cpp:155] Setting up loss6
+I0411 19:43:32.902953   110 net.cpp:163] Top shape: (1)
+I0411 19:43:32.902958   110 net.cpp:168]     with loss weight 1
+I0411 19:43:32.902969   110 layer_factory.hpp:76] Creating layer accuracy
+I0411 19:43:32.902979   110 net.cpp:110] Creating Layer accuracy
+I0411 19:43:32.902984   110 net.cpp:477] accuracy <- fc2_fc2_0_split_1
+I0411 19:43:32.902989   110 net.cpp:477] accuracy <- label_data_1_split_1
+I0411 19:43:32.902997   110 net.cpp:433] accuracy -> accuracy
+I0411 19:43:32.903008   110 net.cpp:155] Setting up accuracy
+I0411 19:43:32.903014   110 net.cpp:163] Top shape: (1)
+I0411 19:43:32.903019   110 net.cpp:240] accuracy does not need backward computation.
+I0411 19:43:32.903024   110 net.cpp:236] loss6 needs backward computation.
+I0411 19:43:32.903029   110 net.cpp:236] fc2_fc2_0_split needs backward computation.
+I0411 19:43:32.903034   110 net.cpp:236] fc2 needs backward computation.
+I0411 19:43:32.903038   110 net.cpp:236] drop1 needs backward computation.
+I0411 19:43:32.903043   110 net.cpp:236] relu4 needs backward computation.
+I0411 19:43:32.903048   110 net.cpp:236] fc1 needs backward computation.
+I0411 19:43:32.903051   110 net.cpp:236] pool1 needs backward computation.
+I0411 19:43:32.903055   110 net.cpp:236] relu1 needs backward computation.
+I0411 19:43:32.903060   110 net.cpp:236] conv1 needs backward computation.
+I0411 19:43:32.903064   110 net.cpp:240] label_data_1_split does not need backward computation.
+I0411 19:43:32.903069   110 net.cpp:240] data does not need backward computation.
+I0411 19:43:32.903074   110 net.cpp:283] This network produces output accuracy
+I0411 19:43:32.903079   110 net.cpp:283] This network produces output loss
+I0411 19:43:32.903089   110 net.cpp:297] Network initialization done.
+I0411 19:43:32.903092   110 net.cpp:298] Memory required for data: 1515608
+I0411 19:43:32.903138   110 solver.cpp:66] Solver scaffolding done.
+I0411 19:43:32.903370   110 solver.cpp:294] Solving EmbedNet
+I0411 19:43:32.903378   110 solver.cpp:295] Learning Rate Policy: fixed
+I0411 19:43:32.903851   110 solver.cpp:347] Iteration 0, Testing net (#0)
+I0411 19:43:33.047770   110 solver.cpp:415]     Test net output #0: accuracy = 0.5148
+I0411 19:43:33.047790   110 solver.cpp:415]     Test net output #1: loss = 0.697124 (* 1 = 0.697124 loss)
+I0411 19:43:33.099547   110 solver.cpp:243] Iteration 0, loss = 0.694812
+I0411 19:43:33.099565   110 solver.cpp:259]     Train net output #0: loss = 0.694812 (* 1 = 0.694812 loss)
+I0411 19:43:33.099575   110 solver.cpp:590] Iteration 0, lr = 1
+I0411 19:43:34.260095   110 solver.cpp:468] Snapshotting to binary proto file train_iter_100.caffemodel
+I0411 19:43:34.267269   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_100.solverstate
+I0411 19:43:34.308827   110 solver.cpp:347] Iteration 100, Testing net (#0)
+I0411 19:43:34.454449   110 solver.cpp:415]     Test net output #0: accuracy = 0.5396
+I0411 19:43:34.454473   110 solver.cpp:415]     Test net output #1: loss = 0.673281 (* 1 = 0.673281 loss)
+I0411 19:43:35.685642   110 solver.cpp:468] Snapshotting to binary proto file train_iter_200.caffemodel
+I0411 19:43:35.692236   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_200.solverstate
+I0411 19:43:35.694728   110 solver.cpp:347] Iteration 200, Testing net (#0)
+I0411 19:43:35.838204   110 solver.cpp:415]     Test net output #0: accuracy = 0.4984
+I0411 19:43:35.838227   110 solver.cpp:415]     Test net output #1: loss = 0.775702 (* 1 = 0.775702 loss)
+I0411 19:43:37.071050   110 solver.cpp:468] Snapshotting to binary proto file train_iter_300.caffemodel
+I0411 19:43:37.077133   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_300.solverstate
+I0411 19:43:37.079496   110 solver.cpp:347] Iteration 300, Testing net (#0)
+I0411 19:43:37.225198   110 solver.cpp:415]     Test net output #0: accuracy = 0.6572
+I0411 19:43:37.225221   110 solver.cpp:415]     Test net output #1: loss = 0.60197 (* 1 = 0.60197 loss)
+I0411 19:43:38.445044   110 solver.cpp:468] Snapshotting to binary proto file train_iter_400.caffemodel
+I0411 19:43:38.451894   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_400.solverstate
+I0411 19:43:38.454316   110 solver.cpp:347] Iteration 400, Testing net (#0)
+I0411 19:43:38.597816   110 solver.cpp:415]     Test net output #0: accuracy = 0.6748
+I0411 19:43:38.597839   110 solver.cpp:415]     Test net output #1: loss = 0.587836 (* 1 = 0.587836 loss)
+I0411 19:43:39.821817   110 solver.cpp:468] Snapshotting to binary proto file train_iter_500.caffemodel
+I0411 19:43:39.828212   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_500.solverstate
+I0411 19:43:39.830807   110 solver.cpp:347] Iteration 500, Testing net (#0)
+I0411 19:43:39.974149   110 solver.cpp:415]     Test net output #0: accuracy = 0.666
+I0411 19:43:39.974174   110 solver.cpp:415]     Test net output #1: loss = 0.60131 (* 1 = 0.60131 loss)
+I0411 19:43:41.202275   110 solver.cpp:468] Snapshotting to binary proto file train_iter_600.caffemodel
+I0411 19:43:41.208787   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_600.solverstate
+I0411 19:43:41.210371   110 solver.cpp:347] Iteration 600, Testing net (#0)
+I0411 19:43:41.353685   110 solver.cpp:415]     Test net output #0: accuracy = 0.6972
+I0411 19:43:41.353708   110 solver.cpp:415]     Test net output #1: loss = 0.558995 (* 1 = 0.558995 loss)
+I0411 19:43:42.586099   110 solver.cpp:468] Snapshotting to binary proto file train_iter_700.caffemodel
+I0411 19:43:42.592531   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_700.solverstate
+I0411 19:43:42.594270   110 solver.cpp:347] Iteration 700, Testing net (#0)
+I0411 19:43:42.737712   110 solver.cpp:415]     Test net output #0: accuracy = 0.6632
+I0411 19:43:42.737735   110 solver.cpp:415]     Test net output #1: loss = 0.599998 (* 1 = 0.599998 loss)
+I0411 19:43:43.970762   110 solver.cpp:468] Snapshotting to binary proto file train_iter_800.caffemodel
+I0411 19:43:43.977170   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_800.solverstate
+I0411 19:43:43.979135   110 solver.cpp:347] Iteration 800, Testing net (#0)
+I0411 19:43:44.122700   110 solver.cpp:415]     Test net output #0: accuracy = 0.6632
+I0411 19:43:44.122725   110 solver.cpp:415]     Test net output #1: loss = 0.644957 (* 1 = 0.644957 loss)
+I0411 19:43:45.307735   110 solver.cpp:468] Snapshotting to binary proto file train_iter_900.caffemodel
+I0411 19:43:45.314028   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_900.solverstate
+I0411 19:43:45.316215   110 solver.cpp:347] Iteration 900, Testing net (#0)
+I0411 19:43:45.461824   110 solver.cpp:415]     Test net output #0: accuracy = 0.71
+I0411 19:43:45.461848   110 solver.cpp:415]     Test net output #1: loss = 0.537376 (* 1 = 0.537376 loss)
+I0411 19:43:46.692780   110 solver.cpp:468] Snapshotting to binary proto file train_iter_1000.caffemodel
+I0411 19:43:46.698521   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_1000.solverstate
+I0411 19:43:46.699898   110 solver.cpp:347] Iteration 1000, Testing net (#0)
+I0411 19:43:46.844197   110 solver.cpp:415]     Test net output #0: accuracy = 0.6648
+I0411 19:43:46.844223   110 solver.cpp:415]     Test net output #1: loss = 0.584692 (* 1 = 0.584692 loss)
+I0411 19:43:48.078748   110 solver.cpp:468] Snapshotting to binary proto file train_iter_1100.caffemodel
+I0411 19:43:48.084878   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_1100.solverstate
+I0411 19:43:48.110788   110 solver.cpp:347] Iteration 1100, Testing net (#0)
+I0411 19:43:48.256150   110 solver.cpp:415]     Test net output #0: accuracy = 0.7284
+I0411 19:43:48.256175   110 solver.cpp:415]     Test net output #1: loss = 0.524131 (* 1 = 0.524131 loss)
+I0411 19:43:49.487416   110 solver.cpp:468] Snapshotting to binary proto file train_iter_1200.caffemodel
+I0411 19:43:49.493691   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_1200.solverstate
+I0411 19:43:49.495193   110 solver.cpp:347] Iteration 1200, Testing net (#0)
+I0411 19:43:49.639462   110 solver.cpp:415]     Test net output #0: accuracy = 0.7192
+I0411 19:43:49.639487   110 solver.cpp:415]     Test net output #1: loss = 0.530448 (* 1 = 0.530448 loss)
+I0411 19:43:50.870950   110 solver.cpp:468] Snapshotting to binary proto file train_iter_1300.caffemodel
+I0411 19:43:50.876973   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_1300.solverstate
+I0411 19:43:50.879039   110 solver.cpp:347] Iteration 1300, Testing net (#0)
+I0411 19:43:51.023102   110 solver.cpp:415]     Test net output #0: accuracy = 0.706
+I0411 19:43:51.023125   110 solver.cpp:415]     Test net output #1: loss = 0.544429 (* 1 = 0.544429 loss)
+I0411 19:43:52.256209   110 solver.cpp:468] Snapshotting to binary proto file train_iter_1400.caffemodel
+I0411 19:43:52.262130   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_1400.solverstate
+I0411 19:43:52.264202   110 solver.cpp:347] Iteration 1400, Testing net (#0)
+I0411 19:43:52.409066   110 solver.cpp:415]     Test net output #0: accuracy = 0.6124
+I0411 19:43:52.409090   110 solver.cpp:415]     Test net output #1: loss = 0.713349 (* 1 = 0.713349 loss)
+I0411 19:43:53.641476   110 solver.cpp:468] Snapshotting to binary proto file train_iter_1500.caffemodel
+I0411 19:43:53.647440   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_1500.solverstate
+I0411 19:43:53.649560   110 solver.cpp:347] Iteration 1500, Testing net (#0)
+I0411 19:43:53.795586   110 solver.cpp:415]     Test net output #0: accuracy = 0.7476
+I0411 19:43:53.795610   110 solver.cpp:415]     Test net output #1: loss = 0.506448 (* 1 = 0.506448 loss)
+I0411 19:43:54.979354   110 solver.cpp:468] Snapshotting to binary proto file train_iter_1600.caffemodel
+I0411 19:43:54.985841   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_1600.solverstate
+I0411 19:43:54.987881   110 solver.cpp:347] Iteration 1600, Testing net (#0)
+I0411 19:43:55.131269   110 solver.cpp:415]     Test net output #0: accuracy = 0.7488
+I0411 19:43:55.131294   110 solver.cpp:415]     Test net output #1: loss = 0.515748 (* 1 = 0.515748 loss)
+I0411 19:43:56.346943   110 solver.cpp:468] Snapshotting to binary proto file train_iter_1700.caffemodel
+I0411 19:43:56.353745   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_1700.solverstate
+I0411 19:43:56.355690   110 solver.cpp:347] Iteration 1700, Testing net (#0)
+I0411 19:43:56.499109   110 solver.cpp:415]     Test net output #0: accuracy = 0.7436
+I0411 19:43:56.499132   110 solver.cpp:415]     Test net output #1: loss = 0.518 (* 1 = 0.518 loss)
+I0411 19:43:57.732302   110 solver.cpp:468] Snapshotting to binary proto file train_iter_1800.caffemodel
+I0411 19:43:57.738314   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_1800.solverstate
+I0411 19:43:57.740481   110 solver.cpp:347] Iteration 1800, Testing net (#0)
+I0411 19:43:57.886876   110 solver.cpp:415]     Test net output #0: accuracy = 0.7472
+I0411 19:43:57.886899   110 solver.cpp:415]     Test net output #1: loss = 0.520513 (* 1 = 0.520513 loss)
+I0411 19:43:59.115923   110 solver.cpp:468] Snapshotting to binary proto file train_iter_1900.caffemodel
+I0411 19:43:59.122730   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_1900.solverstate
+I0411 19:43:59.124691   110 solver.cpp:347] Iteration 1900, Testing net (#0)
+I0411 19:43:59.268100   110 solver.cpp:415]     Test net output #0: accuracy = 0.7436
+I0411 19:43:59.268123   110 solver.cpp:415]     Test net output #1: loss = 0.507487 (* 1 = 0.507487 loss)
+I0411 19:44:00.500705   110 solver.cpp:468] Snapshotting to binary proto file train_iter_2000.caffemodel
+I0411 19:44:00.506613   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_2000.solverstate
+I0411 19:44:00.508435   110 solver.cpp:347] Iteration 2000, Testing net (#0)
+I0411 19:44:00.653251   110 solver.cpp:415]     Test net output #0: accuracy = 0.7144
+I0411 19:44:00.653275   110 solver.cpp:415]     Test net output #1: loss = 0.529442 (* 1 = 0.529442 loss)
+I0411 19:44:01.886903   110 solver.cpp:468] Snapshotting to binary proto file train_iter_2100.caffemodel
+I0411 19:44:01.894119   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_2100.solverstate
+I0411 19:44:01.896334   110 solver.cpp:347] Iteration 2100, Testing net (#0)
+I0411 19:44:02.041822   110 solver.cpp:415]     Test net output #0: accuracy = 0.7412
+I0411 19:44:02.041846   110 solver.cpp:415]     Test net output #1: loss = 0.507103 (* 1 = 0.507103 loss)
+I0411 19:44:03.263595   110 solver.cpp:468] Snapshotting to binary proto file train_iter_2200.caffemodel
+I0411 19:44:03.269460   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_2200.solverstate
+I0411 19:44:03.270931   110 solver.cpp:347] Iteration 2200, Testing net (#0)
+I0411 19:44:03.415901   110 solver.cpp:415]     Test net output #0: accuracy = 0.7536
+I0411 19:44:03.415925   110 solver.cpp:415]     Test net output #1: loss = 0.50703 (* 1 = 0.50703 loss)
+I0411 19:44:04.644140   110 solver.cpp:468] Snapshotting to binary proto file train_iter_2300.caffemodel
+I0411 19:44:04.650902   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_2300.solverstate
+I0411 19:44:04.652678   110 solver.cpp:347] Iteration 2300, Testing net (#0)
+I0411 19:44:04.799055   110 solver.cpp:415]     Test net output #0: accuracy = 0.7316
+I0411 19:44:04.799079   110 solver.cpp:415]     Test net output #1: loss = 0.563565 (* 1 = 0.563565 loss)
+I0411 19:44:05.981379   110 solver.cpp:468] Snapshotting to binary proto file train_iter_2400.caffemodel
+I0411 19:44:05.988369   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_2400.solverstate
+I0411 19:44:05.990967   110 solver.cpp:347] Iteration 2400, Testing net (#0)
+I0411 19:44:06.134307   110 solver.cpp:415]     Test net output #0: accuracy = 0.7616
+I0411 19:44:06.134330   110 solver.cpp:415]     Test net output #1: loss = 0.503476 (* 1 = 0.503476 loss)
+I0411 19:44:07.364783   110 solver.cpp:468] Snapshotting to binary proto file train_iter_2500.caffemodel
+I0411 19:44:07.371650   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_2500.solverstate
+I0411 19:44:07.374061   110 solver.cpp:347] Iteration 2500, Testing net (#0)
+I0411 19:44:07.517580   110 solver.cpp:415]     Test net output #0: accuracy = 0.75
+I0411 19:44:07.517602   110 solver.cpp:415]     Test net output #1: loss = 0.506676 (* 1 = 0.506676 loss)
+I0411 19:44:08.750072   110 solver.cpp:468] Snapshotting to binary proto file train_iter_2600.caffemodel
+I0411 19:44:08.756541   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_2600.solverstate
+I0411 19:44:08.758463   110 solver.cpp:347] Iteration 2600, Testing net (#0)
+I0411 19:44:08.902173   110 solver.cpp:415]     Test net output #0: accuracy = 0.6992
+I0411 19:44:08.902195   110 solver.cpp:415]     Test net output #1: loss = 0.58282 (* 1 = 0.58282 loss)
+I0411 19:44:10.133067   110 solver.cpp:468] Snapshotting to binary proto file train_iter_2700.caffemodel
+I0411 19:44:10.140044   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_2700.solverstate
+I0411 19:44:10.386041   110 solver.cpp:347] Iteration 2700, Testing net (#0)
+I0411 19:44:10.530246   110 solver.cpp:415]     Test net output #0: accuracy = 0.7388
+I0411 19:44:10.530267   110 solver.cpp:415]     Test net output #1: loss = 0.57826 (* 1 = 0.57826 loss)
+I0411 19:44:11.760210   110 solver.cpp:468] Snapshotting to binary proto file train_iter_2800.caffemodel
+I0411 19:44:11.766118   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_2800.solverstate
+I0411 19:44:11.767685   110 solver.cpp:347] Iteration 2800, Testing net (#0)
+I0411 19:44:11.911967   110 solver.cpp:415]     Test net output #0: accuracy = 0.7488
+I0411 19:44:11.911990   110 solver.cpp:415]     Test net output #1: loss = 0.512431 (* 1 = 0.512431 loss)
+I0411 19:44:13.145445   110 solver.cpp:468] Snapshotting to binary proto file train_iter_2900.caffemodel
+I0411 19:44:13.152340   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_2900.solverstate
+I0411 19:44:13.154512   110 solver.cpp:347] Iteration 2900, Testing net (#0)
+I0411 19:44:13.299957   110 solver.cpp:415]     Test net output #0: accuracy = 0.744
+I0411 19:44:13.299980   110 solver.cpp:415]     Test net output #1: loss = 0.516808 (* 1 = 0.516808 loss)
+I0411 19:44:14.529247   110 solver.cpp:468] Snapshotting to binary proto file train_iter_3000.caffemodel
+I0411 19:44:14.535007   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_3000.solverstate
+I0411 19:44:14.536826   110 solver.cpp:347] Iteration 3000, Testing net (#0)
+I0411 19:44:14.681483   110 solver.cpp:415]     Test net output #0: accuracy = 0.7264
+I0411 19:44:14.681506   110 solver.cpp:415]     Test net output #1: loss = 0.613753 (* 1 = 0.613753 loss)
+I0411 19:44:15.913919   110 solver.cpp:468] Snapshotting to binary proto file train_iter_3100.caffemodel
+I0411 19:44:15.920790   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_3100.solverstate
+I0411 19:44:15.922356   110 solver.cpp:347] Iteration 3100, Testing net (#0)
+I0411 19:44:16.068056   110 solver.cpp:415]     Test net output #0: accuracy = 0.7492
+I0411 19:44:16.068079   110 solver.cpp:415]     Test net output #1: loss = 0.513355 (* 1 = 0.513355 loss)
+I0411 19:44:17.252225   110 solver.cpp:468] Snapshotting to binary proto file train_iter_3200.caffemodel
+I0411 19:44:17.258726   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_3200.solverstate
+I0411 19:44:17.260728   110 solver.cpp:347] Iteration 3200, Testing net (#0)
+I0411 19:44:17.404111   110 solver.cpp:415]     Test net output #0: accuracy = 0.7336
+I0411 19:44:17.404135   110 solver.cpp:415]     Test net output #1: loss = 0.599687 (* 1 = 0.599687 loss)
+I0411 19:44:18.620566   110 solver.cpp:468] Snapshotting to binary proto file train_iter_3300.caffemodel
+I0411 19:44:18.627406   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_3300.solverstate
+I0411 19:44:18.629114   110 solver.cpp:347] Iteration 3300, Testing net (#0)
+I0411 19:44:18.772621   110 solver.cpp:415]     Test net output #0: accuracy = 0.7576
+I0411 19:44:18.772644   110 solver.cpp:415]     Test net output #1: loss = 0.524314 (* 1 = 0.524314 loss)
+I0411 19:44:20.005153   110 solver.cpp:468] Snapshotting to binary proto file train_iter_3400.caffemodel
+I0411 19:44:20.011108   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_3400.solverstate
+I0411 19:44:20.012969   110 solver.cpp:347] Iteration 3400, Testing net (#0)
+I0411 19:44:20.159274   110 solver.cpp:415]     Test net output #0: accuracy = 0.7096
+I0411 19:44:20.159298   110 solver.cpp:415]     Test net output #1: loss = 0.665887 (* 1 = 0.665887 loss)
+I0411 19:44:21.390516   110 solver.cpp:468] Snapshotting to binary proto file train_iter_3500.caffemodel
+I0411 19:44:21.397387   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_3500.solverstate
+I0411 19:44:21.399556   110 solver.cpp:347] Iteration 3500, Testing net (#0)
+I0411 19:44:21.544786   110 solver.cpp:415]     Test net output #0: accuracy = 0.7416
+I0411 19:44:21.544809   110 solver.cpp:415]     Test net output #1: loss = 0.560676 (* 1 = 0.560676 loss)
+I0411 19:44:22.776340   110 solver.cpp:468] Snapshotting to binary proto file train_iter_3600.caffemodel
+I0411 19:44:22.782703   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_3600.solverstate
+I0411 19:44:22.784414   110 solver.cpp:347] Iteration 3600, Testing net (#0)
+I0411 19:44:22.930858   110 solver.cpp:415]     Test net output #0: accuracy = 0.7564
+I0411 19:44:22.930881   110 solver.cpp:415]     Test net output #1: loss = 0.529475 (* 1 = 0.529475 loss)
+I0411 19:44:24.159632   110 solver.cpp:468] Snapshotting to binary proto file train_iter_3700.caffemodel
+I0411 19:44:24.166538   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_3700.solverstate
+I0411 19:44:24.168506   110 solver.cpp:347] Iteration 3700, Testing net (#0)
+I0411 19:44:24.314038   110 solver.cpp:415]     Test net output #0: accuracy = 0.7584
+I0411 19:44:24.314060   110 solver.cpp:415]     Test net output #1: loss = 0.524183 (* 1 = 0.524183 loss)
+I0411 19:44:25.544404   110 solver.cpp:468] Snapshotting to binary proto file train_iter_3800.caffemodel
+I0411 19:44:25.550719   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_3800.solverstate
+I0411 19:44:25.552372   110 solver.cpp:347] Iteration 3800, Testing net (#0)
+I0411 19:44:25.697140   110 solver.cpp:415]     Test net output #0: accuracy = 0.7452
+I0411 19:44:25.697163   110 solver.cpp:415]     Test net output #1: loss = 0.529896 (* 1 = 0.529896 loss)
+I0411 19:44:26.926003   110 solver.cpp:468] Snapshotting to binary proto file train_iter_3900.caffemodel
+I0411 19:44:26.931962   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_3900.solverstate
+I0411 19:44:26.933195   110 solver.cpp:347] Iteration 3900, Testing net (#0)
+I0411 19:44:27.077739   110 solver.cpp:415]     Test net output #0: accuracy = 0.7496
+I0411 19:44:27.077761   110 solver.cpp:415]     Test net output #1: loss = 0.530368 (* 1 = 0.530368 loss)
+I0411 19:44:28.265836   110 solver.cpp:468] Snapshotting to binary proto file train_iter_4000.caffemodel
+I0411 19:44:28.272202   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_4000.solverstate
+I0411 19:44:28.274627   110 solver.cpp:347] Iteration 4000, Testing net (#0)
+I0411 19:44:28.418066   110 solver.cpp:415]     Test net output #0: accuracy = 0.6352
+I0411 19:44:28.418089   110 solver.cpp:415]     Test net output #1: loss = 0.751491 (* 1 = 0.751491 loss)
+I0411 19:44:29.651275   110 solver.cpp:468] Snapshotting to binary proto file train_iter_4100.caffemodel
+I0411 19:44:29.665298   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_4100.solverstate
+I0411 19:44:29.667423   110 solver.cpp:347] Iteration 4100, Testing net (#0)
+I0411 19:44:29.812000   110 solver.cpp:415]     Test net output #0: accuracy = 0.74
+I0411 19:44:29.812023   110 solver.cpp:415]     Test net output #1: loss = 0.554234 (* 1 = 0.554234 loss)
+I0411 19:44:31.047478   110 solver.cpp:468] Snapshotting to binary proto file train_iter_4200.caffemodel
+I0411 19:44:31.054177   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_4200.solverstate
+I0411 19:44:31.056093   110 solver.cpp:347] Iteration 4200, Testing net (#0)
+I0411 19:44:31.199517   110 solver.cpp:415]     Test net output #0: accuracy = 0.7308
+I0411 19:44:31.199540   110 solver.cpp:415]     Test net output #1: loss = 0.556448 (* 1 = 0.556448 loss)
+I0411 19:44:32.431965   110 solver.cpp:468] Snapshotting to binary proto file train_iter_4300.caffemodel
+I0411 19:44:32.439375   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_4300.solverstate
+I0411 19:44:32.441017   110 solver.cpp:347] Iteration 4300, Testing net (#0)
+I0411 19:44:32.585484   110 solver.cpp:415]     Test net output #0: accuracy = 0.7496
+I0411 19:44:32.585507   110 solver.cpp:415]     Test net output #1: loss = 0.540694 (* 1 = 0.540694 loss)
+I0411 19:44:33.817231   110 solver.cpp:468] Snapshotting to binary proto file train_iter_4400.caffemodel
+I0411 19:44:33.824056   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_4400.solverstate
+I0411 19:44:33.825633   110 solver.cpp:347] Iteration 4400, Testing net (#0)
+I0411 19:44:33.970290   110 solver.cpp:415]     Test net output #0: accuracy = 0.7344
+I0411 19:44:33.970314   110 solver.cpp:415]     Test net output #1: loss = 0.607779 (* 1 = 0.607779 loss)
+I0411 19:44:35.203488   110 solver.cpp:468] Snapshotting to binary proto file train_iter_4500.caffemodel
+I0411 19:44:35.210590   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_4500.solverstate
+I0411 19:44:35.212641   110 solver.cpp:347] Iteration 4500, Testing net (#0)
+I0411 19:44:35.357354   110 solver.cpp:415]     Test net output #0: accuracy = 0.7488
+I0411 19:44:35.357378   110 solver.cpp:415]     Test net output #1: loss = 0.545403 (* 1 = 0.545403 loss)
+I0411 19:44:36.588351   110 solver.cpp:468] Snapshotting to binary proto file train_iter_4600.caffemodel
+I0411 19:44:36.594281   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_4600.solverstate
+I0411 19:44:36.596261   110 solver.cpp:347] Iteration 4600, Testing net (#0)
+I0411 19:44:36.742743   110 solver.cpp:415]     Test net output #0: accuracy = 0.7356
+I0411 19:44:36.742765   110 solver.cpp:415]     Test net output #1: loss = 0.568796 (* 1 = 0.568796 loss)
+I0411 19:44:37.926375   110 solver.cpp:468] Snapshotting to binary proto file train_iter_4700.caffemodel
+I0411 19:44:37.933384   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_4700.solverstate
+I0411 19:44:37.935400   110 solver.cpp:347] Iteration 4700, Testing net (#0)
+I0411 19:44:38.078997   110 solver.cpp:415]     Test net output #0: accuracy = 0.7204
+I0411 19:44:38.079021   110 solver.cpp:415]     Test net output #1: loss = 0.566162 (* 1 = 0.566162 loss)
+I0411 19:44:39.293999   110 solver.cpp:468] Snapshotting to binary proto file train_iter_4800.caffemodel
+I0411 19:44:39.300448   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_4800.solverstate
+I0411 19:44:39.302479   110 solver.cpp:347] Iteration 4800, Testing net (#0)
+I0411 19:44:39.445883   110 solver.cpp:415]     Test net output #0: accuracy = 0.7356
+I0411 19:44:39.445905   110 solver.cpp:415]     Test net output #1: loss = 0.595575 (* 1 = 0.595575 loss)
+I0411 19:44:40.670748   110 solver.cpp:468] Snapshotting to binary proto file train_iter_4900.caffemodel
+I0411 19:44:40.677830   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_4900.solverstate
+I0411 19:44:40.679798   110 solver.cpp:347] Iteration 4900, Testing net (#0)
+I0411 19:44:40.823230   110 solver.cpp:415]     Test net output #0: accuracy = 0.744
+I0411 19:44:40.823253   110 solver.cpp:415]     Test net output #1: loss = 0.540949 (* 1 = 0.540949 loss)
+I0411 19:44:42.050156   110 solver.cpp:468] Snapshotting to binary proto file train_iter_5000.caffemodel
+I0411 19:44:42.056689   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_5000.solverstate
+I0411 19:44:42.058785   110 solver.cpp:347] Iteration 5000, Testing net (#0)
+I0411 19:44:42.202389   110 solver.cpp:415]     Test net output #0: accuracy = 0.7384
+I0411 19:44:42.202412   110 solver.cpp:415]     Test net output #1: loss = 0.545658 (* 1 = 0.545658 loss)
+I0411 19:44:43.435370   110 solver.cpp:468] Snapshotting to binary proto file train_iter_5100.caffemodel
+I0411 19:44:43.442313   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_5100.solverstate
+I0411 19:44:43.444589   110 solver.cpp:347] Iteration 5100, Testing net (#0)
+I0411 19:44:43.587911   110 solver.cpp:415]     Test net output #0: accuracy = 0.7444
+I0411 19:44:43.587934   110 solver.cpp:415]     Test net output #1: loss = 0.601755 (* 1 = 0.601755 loss)
+I0411 19:44:44.820255   110 solver.cpp:468] Snapshotting to binary proto file train_iter_5200.caffemodel
+I0411 19:44:44.826695   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_5200.solverstate
+I0411 19:44:44.828987   110 solver.cpp:347] Iteration 5200, Testing net (#0)
+I0411 19:44:44.972539   110 solver.cpp:415]     Test net output #0: accuracy = 0.7356
+I0411 19:44:44.972563   110 solver.cpp:415]     Test net output #1: loss = 0.540705 (* 1 = 0.540705 loss)
+I0411 19:44:46.206054   110 solver.cpp:468] Snapshotting to binary proto file train_iter_5300.caffemodel
+I0411 19:44:46.212041   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_5300.solverstate
+I0411 19:44:46.213260   110 solver.cpp:347] Iteration 5300, Testing net (#0)
+I0411 19:44:46.359508   110 solver.cpp:415]     Test net output #0: accuracy = 0.7452
+I0411 19:44:46.359530   110 solver.cpp:415]     Test net output #1: loss = 0.538157 (* 1 = 0.538157 loss)
+I0411 19:44:47.582427   110 solver.cpp:468] Snapshotting to binary proto file train_iter_5400.caffemodel
+I0411 19:44:47.589077   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_5400.solverstate
+I0411 19:44:47.590692   110 solver.cpp:347] Iteration 5400, Testing net (#0)
+I0411 19:44:47.736044   110 solver.cpp:415]     Test net output #0: accuracy = 0.7424
+I0411 19:44:47.736068   110 solver.cpp:415]     Test net output #1: loss = 0.529142 (* 1 = 0.529142 loss)
+I0411 19:44:48.962771   110 solver.cpp:468] Snapshotting to binary proto file train_iter_5500.caffemodel
+I0411 19:44:48.968863   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_5500.solverstate
+I0411 19:44:48.970758   110 solver.cpp:347] Iteration 5500, Testing net (#0)
+I0411 19:44:49.115061   110 solver.cpp:415]     Test net output #0: accuracy = 0.7428
+I0411 19:44:49.115083   110 solver.cpp:415]     Test net output #1: loss = 0.543761 (* 1 = 0.543761 loss)
+I0411 19:44:50.299435   110 solver.cpp:468] Snapshotting to binary proto file train_iter_5600.caffemodel
+I0411 19:44:50.306234   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_5600.solverstate
+I0411 19:44:50.308146   110 solver.cpp:347] Iteration 5600, Testing net (#0)
+I0411 19:44:50.451505   110 solver.cpp:415]     Test net output #0: accuracy = 0.7512
+I0411 19:44:50.451527   110 solver.cpp:415]     Test net output #1: loss = 0.544836 (* 1 = 0.544836 loss)
+I0411 19:44:51.684350   110 solver.cpp:468] Snapshotting to binary proto file train_iter_5700.caffemodel
+I0411 19:44:51.690913   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_5700.solverstate
+I0411 19:44:51.692386   110 solver.cpp:347] Iteration 5700, Testing net (#0)
+I0411 19:44:51.835618   110 solver.cpp:415]     Test net output #0: accuracy = 0.7544
+I0411 19:44:51.835646   110 solver.cpp:415]     Test net output #1: loss = 0.554418 (* 1 = 0.554418 loss)
+I0411 19:44:53.069628   110 solver.cpp:468] Snapshotting to binary proto file train_iter_5800.caffemodel
+I0411 19:44:53.076680   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_5800.solverstate
+I0411 19:44:53.078701   110 solver.cpp:347] Iteration 5800, Testing net (#0)
+I0411 19:44:53.221899   110 solver.cpp:415]     Test net output #0: accuracy = 0.7424
+I0411 19:44:53.221922   110 solver.cpp:415]     Test net output #1: loss = 0.55337 (* 1 = 0.55337 loss)
+I0411 19:44:54.455309   110 solver.cpp:468] Snapshotting to binary proto file train_iter_5900.caffemodel
+I0411 19:44:54.461604   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_5900.solverstate
+I0411 19:44:54.704679   110 solver.cpp:347] Iteration 5900, Testing net (#0)
+I0411 19:44:54.851115   110 solver.cpp:415]     Test net output #0: accuracy = 0.7296
+I0411 19:44:54.851140   110 solver.cpp:415]     Test net output #1: loss = 0.587075 (* 1 = 0.587075 loss)
+I0411 19:44:56.079270   110 solver.cpp:468] Snapshotting to binary proto file train_iter_6000.caffemodel
+I0411 19:44:56.085135   110 solver.cpp:753] Snapshotting solver state to binary proto file train_iter_6000.solverstate
+I0411 19:44:56.086519   110 solver.cpp:347] Iteration 6000, Testing net (#0)
+I0411 19:44:56.232044   110 solver.cpp:415]     Test net output #0: accuracy = 0.7436
+I0411 19:44:56.232069   110 solver.cpp:415]     Test net output #1: loss = 0.535282 (* 1 = 0.535282 loss)
+I0411 19:44:56.232075   110 solver.cpp:332] Optimization Done.

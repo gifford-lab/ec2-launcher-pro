@@ -1,0 +1,12 @@
+{
+    "directives": [
+        {
+            "type": "train", 
+            "parameters": {
+                "solver": "/data/16_G/mri/task/{dropout_ratio- 0.1, momentum- 0.999, delta- 1e-8}/solver.prototxt"
+            }
+        }
+    ], 
+    "id": "39cd5e73-c7b4-4a0b-a069-51a2936030c6", 
+    "title": "{u'dropout_ratio': u'0.1', u'momentum': u'0.999', u'delta': u'1e-8'}"
+}
