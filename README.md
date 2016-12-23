@@ -1,7 +1,7 @@
 A tool that lauches docker jobs on Amazon EC2 cloud instances (machines).
 
 ## Dependencies
-You will need to pack your software in [Docker](www.docker.com) and make it available on [Docker Hub](hub.docker.com).
+You will need to pack your software in [Docker](www.docker.com) and make it available on [Docker Hub](hub.docker.com). We support running nvidia-docker.
 
 ## Connection Mode
 Two connection modes are provided: VPN and S3. 
@@ -97,7 +97,7 @@ optional arguments:
 ```
 
 #### Commonly tweakable options (Default value can be found above)
-+ `AMI`: Choose the right OS that matches your usage. 
++ `AMI`: Choose the right OS that matches your usage. The default AMI for GPU mode is ami-763a311e which has CUDA7.0. For CUDA8.0, we recommend ami-e3a6fcf4.
 + `ITYPE` Choose the right machine [type](https://aws.amazon.com/ec2/instance-types/) that matches your usage. 
 + `PRICE`: In EC2 console, check out "Pricing History" under "Instances" -> "Spot Requests" for a good price for your region and instance type.
 + `EMAIL`:  If an address is provided, a notification email will be sent from this address to itself every time an EC2 instance finishes. This address has to be added to the list of "verified sender" in your EC2 Simple Email Service console.

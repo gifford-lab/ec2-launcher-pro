@@ -9,11 +9,16 @@ sudo apt-get -q -y install apparmor-utils
   sudo apt-get install apt-transport-https
 }
 
-# Set up docker
-sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9
-sudo sh -c "echo deb https://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list"
+## Install Docker and NVIDIA-docker
 sudo apt-get update
-sudo apt-get -q -y --force-yes install lxc-docker
+sudo apt-get install apt-transport-https ca-certificates
+sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" | sudo tee /etc/apt/sources.list.d/docker.list
+sudo apt-get update
+sudo apt-get install -y linux-image-extra-$(uname -r) linux-image-extra-virtual
+
+sudo apt-get update
+sudo apt-get install -y docker-engine
 
 sudo groupadd docker
 sudo gpasswd -a ubuntu docker
@@ -28,25 +33,26 @@ sudo ln -s /scratch/docker /var/lib/docker
 sudo echo 'DOCKER_OPTS="-g /scratch/docker -G docker"' >> /etc/default/docker
 sudo service docker restart
 
+wget -P /tmp https://github.com/NVIDIA/nvidia-docker/releases/download/v1.0.0-rc.3/nvidia-docker_1.0.0.rc.3-1_amd64.deb
+sudo dpkg -i /tmp/nvidia-docker*.deb && rm /tmp/nvidia-docker*.deb
+
 # Set up AWSCLI and other user-specific setup
-sudo apt-get -q -y install parallel
-sudo apt-get -q -y install python-pip
+sudo apt-get -q -y install parallel python-pip
 sudo pip install awscli
 sudo mkdir ~/.aws
-
-sudo sudo mkdir /scratch/tmp
-sudo chmod -R 777 /scratch/tmp
-sudo touch /scratch/done
-
 printf "[default]\naws_access_key_id=AKEY\naws_secret_access_key=SKEY" > ~/.aws/config
+iname=$(wget -q -O - http://169.254.169.254/latest/meta-data/instance-id)
+aws --region us-east-1 --output text ec2 create-tags --resources $iname --tags Key=Name,Value=docker-USER-NUM
+
 aws s3 cp s3://BUCKET_NAME/RUN_NAME/runparams/passwd /scratch/ --region REALM
 sudo bash -c "cat /scratch/passwd >> /etc/passwd"
-
 sudo usermod -a -G docker USER
 sudo service docker restart
 
-iname=$(wget -q -O - http://169.254.169.254/latest/meta-data/instance-id)
-aws --region us-east-1 --output text ec2 create-tags --resources $iname --tags Key=Name,Value=docker-USER-NUM
+## Set up tmp folder
+sudo sudo mkdir /scratch/tmp
+sudo chmod -R 777 /scratch/tmp
+sudo touch /scratch/done
 
 # Set up GPU device
 GPUMODE=GPUMODE_PARAM
