@@ -38,11 +38,7 @@ docker run -i -v /cluster/ec2:/cluster/ec2 -v /etc/passwd:/root/passwd:ro \
 	python ec2run.py MODE VPN 
 ```
 + `MODE`: CPU or GPU
-+ `CREDFILE`: The absolute path to EC2 cred file. Gifford lab member can use /cluster/ec2/cred . ([example](https://github.com/gifford-lab/ec2-launcher-pro/blob/master/example/cred))
-	+ `rsa_key`: The physical location of the key-pair file for your Amazon EC2 account. This file enables the user to remotely communicate with the EC2 instance created. Checkout [here](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#having-ec2-create-your-key-pair) for a instruction to generate your key-pair file. 
-	+ `access_key` and `secret_key`: The credentials for your Amazon EC2 account. Checkout [here](http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSGettingStartedGuide/AWSCredentials.html) for instruction.
-	+ `access_key_remote` and `secret_key_remote`: Currently useless. Should be set the same as `access_key` and `secret_key`.
-
++ `CREDFILE`: The absolute path to a file containing credential information of your Amazon AWS account. Gifford lab member can use /cluster/ec2/cred . More information please read [here](https://github.com/gifford-lab/ec2-launcher-pro/blob/master/cred_tutorial/credfile.md).
 + `RUNFILE`: The absolute path to a file containing bash commands (usually `docker run` commands) to run. Each line should be one complete bash command which will be run as one job (process). To specify the number of jobs per EC2 instance, checkout the "Option" section below. If needed, multiple bash commands can be concatenated into oneline seperated by ";" and they will be sequentially executed. (example:[CPU](https://github.com/gifford-lab/ec2-launcher-pro/blob/master/example/testscript.txt)
   [GPU](https://github.com/gifford-lab/ec2-launcher-pro/blob/master/example/testscript-gpu.txt))
 
@@ -113,6 +109,3 @@ optional arguments:
 + `BUCKET`: The S3 bucket to store the input and output.  **(required, no defalt value)**
 + `RUNNAME`: The S3 folder in the bucket to store the input and output.  **(required, no defalt value)**
 
-## To do
-+ ~~Make the mounted drive size a configurable parameter~~
-+ Use IAM role configuration instead of authentic credentials to access S3 from EC2 instance for security
