@@ -36,7 +36,7 @@ sudo ln -s /scratch/docker /var/lib/docker
 sudo echo 'DOCKER_OPTS="-g /scratch/docker -G docker"' >> /etc/default/docker
 sudo service docker restart
 
-wget -P /tmp https://github.com/NVIDIA/nvidia-docker/releases/download/v1.0.0-rc.3/nvidia-docker_1.0.0.rc.3-1_amd64.deb
+wget -P /tmp https://github.com/NVIDIA/nvidia-docker/releases/download/v1.0.1/nvidia-docker_1.0.1-1_amd64.deb
 sudo dpkg -i /tmp/nvidia-docker*.deb && rm /tmp/nvidia-docker*.deb
 
 ## Set up AWS utility
