@@ -77,9 +77,9 @@ positional arguments:
 
 optional arguments:
   -h, --help                            show this help message and exit
-  -a AMI, --ami AMI                     Target AMI (default ami-864d84ee for CPU mode, and ami-763a311e for GPU mode).
+  -a AMI, --ami AMI                     Target AMI (default ami-0565af6e282977273 for CPU mode, and ami-060865e8b5914b4c4 for GPU mode).
   -s SUBNET, --subnet SUBNET            VPN (?) subnet.
-  -i ITYPE, --itype ITYPE               Instance type (default r3.xlarge for CPU mode, and g2.2xlarge for GPU mode).
+  -i ITYPE, --itype ITYPE               Instance type (default r3.xlarge for CPU mode, and g3s.xlarge for GPU mode).
   -k KEYNAME, --keyname KEYNAME         Keyname (default starcluster; credential file overrides this).
   -r REGION, --region REGION            EC2 region (for S3 mode only, default us-east-1).
   -p PRICE, --price PRICE               Spot bid price (default 0.34).
@@ -93,7 +93,7 @@ optional arguments:
 ```
 
 #### Commonly tweakable options (Default value can be found above)
-+ `AMI`: Choose the right OS that matches your usage. The default AMI for GPU mode is ami-763a311e which has CUDA7.0. For CUDA8.0, we recommend ami-e3a6fcf4.
++ `AMI`: Choose the right OS that matches your usage. The default AMI for GPU mode is ami-060865e8b5914b4c4 which has CUDA10.0. For other versions, check out the EC2 AMI marketplace.
 + `ITYPE` Choose the right machine [type](https://aws.amazon.com/ec2/instance-types/) that matches your usage. 
 + `PRICE`: In EC2 console, check out "Pricing History" under "Instances" -> "Spot Requests" for a good price for your region and instance type.
 + `EMAIL`:  If an address is provided, a notification email will be sent from this address to itself every time an EC2 instance finishes. This address has to be added to the list of "verified sender" in your EC2 Simple Email Service console.

@@ -116,6 +116,6 @@ aws s3 cp /scratch/output s3://BUCKET_NAME/RUN_NAME/output --region REALM --recu
 aws s3 cp /scratch/log s3://BUCKET_NAME/RUN_NAME/log --region REALM --recursive
 
 # Terminate the process
-sirname=$(aws --region us-east-1 --output text ec2 describe-spot-instance-requests | grep $iname | cut -d$'\t' -f6)
+sirname=$(aws --region us-east-1 --output text ec2 describe-spot-instance-requests | grep $iname | cut -d$'\t' -f7)
 aws ec2 cancel-spot-instance-requests --spot-instance-request-ids $sirname --region REALM
 aws ec2 terminate-instances --instance-ids $iname --region REALM
